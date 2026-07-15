@@ -1,0 +1,19 @@
+{
+  "name": "watchlog",
+  "version": "1.0.0",
+  "description": "WatchLog - Personal Movie & Book Watchlist (Stage 1: TypeScript foundation)",
+  "author": "Mahesh Nivrutti Sutar",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:live": "npm run build && node scripts/test-search.mjs"
+  },
+  "devDependencies": {
+    "@types/node": "20.12.7",
+    "dotenv": "16.4.5",
+    "typescript": "5.4.5",
+    "vitest": "1.6.0"
+  }
+}
