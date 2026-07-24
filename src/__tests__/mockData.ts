@@ -15,7 +15,7 @@ export const mockWatchlist: WatchlistItem[] = [
     dateAdded: '2026-01-10',
     releaseYear: 2010,
     director: 'Christopher Nolan',
-    coverUrl: 'https://example.com/inception.jpg',
+    coverUrl: 'https://image.tmdb.org/t/p/w200/xlaY2zyzMfkhk0HSC5VUwzoZPU1.jpg',
   },
   {
     id: '2',
@@ -26,7 +26,7 @@ export const mockWatchlist: WatchlistItem[] = [
     rating: null,
     dateAdded: '2026-02-15',
     releaseYear: 1999,
-    coverUrl: 'https://example.com/matrix.jpg',
+    coverUrl: 'https://www.themoviedb.org/t/p/w1280/dXNAPwY7VrqMAo51EKhhCJfaGb5.jpg',
   },
   {
     id: '3',
@@ -38,6 +38,7 @@ export const mockWatchlist: WatchlistItem[] = [
     dateAdded: '2026-01-20',
     author: 'Frank Herbert',
     publishYear: 1965,
+    coverUrl: 'https://covers.openlibrary.org/b/id/8904770-M.jpg',
   },
   {
     id: '4',
@@ -49,6 +50,7 @@ export const mockWatchlist: WatchlistItem[] = [
     dateAdded: '2026-03-01',
     author: 'George Orwell',
     publishYear: 1949,
+    coverUrl: 'https://covers.openlibrary.org/b/id/8739161-M.jpg',
   },
   {
     id: '5',
@@ -60,6 +62,7 @@ export const mockWatchlist: WatchlistItem[] = [
     dateAdded: '2026-04-05',
     releaseYear: 2014,
     director: 'Christopher Nolan',
+    coverUrl: 'https://www.themoviedb.org/t/p/w1280/yQvGrMoipbRoddT0ZR8tPoR7NfX.jpg',
   },
   {
     id: '6',
@@ -71,6 +74,7 @@ export const mockWatchlist: WatchlistItem[] = [
     dateAdded: '2026-05-12',
     author: 'J.R.R. Tolkien',
     publishYear: 1937,
+    coverUrl: 'https://covers.openlibrary.org/b/id/6979861-M.jpg',
   },
   {
     id: '7',
@@ -81,7 +85,44 @@ export const mockWatchlist: WatchlistItem[] = [
     rating: 4,
     dateAdded: '2026-02-28',
     releaseYear: 2017,
+    coverUrl: 'https://www.themoviedb.org/t/p/w1280/gajva2L0rPYkEWjzgFlBXCAVBE5.jpg',
   },
+  {
+    id: '8',
+    type: 'movie',
+    title: 'Parasite',
+    genres: ['Thriller', 'Drama'],
+    status: 'done',
+    rating: 3,
+    dateAdded: '2026-03-20',
+    releaseYear: 2019,
+    director: 'Bong Joon-ho',
+    coverUrl: 'https://www.themoviedb.org/t/p/w1280/4DGPORlVIDIQvsuSDnM4uXKMjWS.jpg',
+  },
+  {
+    id: '9',
+    type: 'book',
+    title: 'Project Hail Mary',
+    genres: ['Sci-Fi', 'Adventure'],
+    status: 'want',
+    rating: null,
+    dateAdded: '2026-06-01',
+    author: 'Andy Weir',
+    publishYear: 2021,
+    coverUrl: 'https://covers.openlibrary.org/b/id/12624743-M.jpg',
+  },
+  {
+    id: '10',
+    type: 'movie',
+    title: 'Everything Everywhere All at Once',
+    genres: ['Sci-Fi', 'Comedy'],
+    status: 'watching',
+    rating: null,
+    dateAdded: '2026-06-20',
+    releaseYear: 2022,
+    director: 'Daniel Kwan, Daniel Scheinert',
+    coverUrl: 'https://www.themoviedb.org/t/p/w1280/u68AjlvlutfEIcpmbYpKcdi09ut.jpg',
+  }
 ];
 
 export const emptyWatchlist: WatchlistItem[] = [];

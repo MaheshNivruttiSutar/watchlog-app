@@ -9,14 +9,18 @@ import { mockWatchlist } from './mockData.js';
 describe('filterByStatus', () => {
   it('returns only items with the given status', () => {
     const done = filterByStatus(mockWatchlist, 'done');
-    expect(done).toHaveLength(3);
+    expect(done).toHaveLength(4);
     expect(done.every((item) => item.status === 'done')).toBe(true);
   });
 
   it('returns want items', () => {
     const want = filterByStatus(mockWatchlist, 'want');
-    expect(want).toHaveLength(2);
-    expect(want.map((i) => i.title)).toEqual(['Interstellar', 'The Hobbit']);
+    expect(want).toHaveLength(3);
+    expect(want.map((i) => i.title)).toEqual([
+      'Interstellar',
+      'The Hobbit',
+      'Project Hail Mary',
+    ]);
   });
 
   it('returns empty array when no items match', () => {
@@ -28,13 +32,13 @@ describe('filterByStatus', () => {
 describe('filterByType', () => {
   it('returns only movies', () => {
     const movies = filterByType(mockWatchlist, 'movie');
-    expect(movies).toHaveLength(4);
+    expect(movies).toHaveLength(6);
     expect(movies.every((item) => item.type === 'movie')).toBe(true);
   });
 
   it('returns only books', () => {
     const books = filterByType(mockWatchlist, 'book');
-    expect(books).toHaveLength(3);
+    expect(books).toHaveLength(4);
     expect(books.every((item) => item.type === 'book')).toBe(true);
   });
 });
@@ -42,7 +46,7 @@ describe('filterByType', () => {
 describe('filterByGenre', () => {
   it('finds items with matching genre (case-insensitive)', () => {
     const sciFi = filterByGenre(mockWatchlist, 'sci-fi');
-    expect(sciFi).toHaveLength(5);
+    expect(sciFi).toHaveLength(7);
   });
 
   it('finds items with Fantasy genre', () => {

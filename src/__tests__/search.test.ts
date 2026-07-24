@@ -135,6 +135,7 @@ describe('search', () => {
     await search('test', 'book');
     expect(fetch).toHaveBeenCalledWith(
       expect.stringContaining('openlibrary.org'),
+      { signal: undefined },
     );
   });
 });

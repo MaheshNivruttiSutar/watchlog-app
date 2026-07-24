@@ -5,7 +5,7 @@ import { mockWatchlist } from './mockData.js';
 describe('groupByGenre', () => {
   it('groups items by genre', () => {
     const groups = groupByGenre(mockWatchlist);
-    expect(groups['Sci-Fi']).toHaveLength(5);
+    expect(groups['Sci-Fi']).toHaveLength(7);
     expect(groups['Action']).toHaveLength(2);
     expect(groups['Fantasy']).toHaveLength(1);
   });

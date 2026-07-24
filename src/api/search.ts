@@ -23,11 +23,20 @@ interface OpenLibraryResponse {
   docs?: OpenLibraryDoc[];
 }
 
+function rethrowIfAborted(err: unknown): void {
+  if (err instanceof DOMException && err.name === 'AbortError') {
+    throw err;
+  }
+}
+
 /**
  * Search for books using the free Open Library API.
  * No API key needed.
  */
-export async function searchBooks(query: string): Promise<SearchResult[]> {
+export async function searchBooks(
+  query: string,
+  signal?: AbortSignal,
+): Promise<SearchResult[]> {
   if (!query.trim()) {
     return [];
   }
@@ -36,8 +45,9 @@ export async function searchBooks(query: string): Promise<SearchResult[]> {
 
   let response: Response;
   try {
-    response = await fetch(url);
-  } catch {
+    response = await fetch(url, { signal });
+  } catch (err) {
+    rethrowIfAborted(err);
     throw new SearchApiError(
       'Network error while searching books',
       'openLibrary',
@@ -68,7 +78,10 @@ interface TmdbSearchResponse {
  * Search for movies using the TMDB API.
  * Requires TMDB_API_KEY environment variable.
  */
-export async function searchMovies(query: string): Promise<SearchResult[]> {
+export async function searchMovies(
+  query: string,
+  signal?: AbortSignal,
+): Promise<SearchResult[]> {
   if (!query.trim()) {
     return [];
   }
@@ -84,8 +97,9 @@ export async function searchMovies(query: string): Promise<SearchResult[]> {
 
   let response: Response;
   try {
-    response = await fetch(url);
-  } catch {
+    response = await fetch(url, { signal });
+  } catch (err) {
+    rethrowIfAborted(err);
     throw new SearchApiError(
       'Network error while searching movies',
       'tmdb',
@@ -113,9 +127,10 @@ export async function searchMovies(query: string): Promise<SearchResult[]> {
 export async function search(
   query: string,
   type: ItemType,
+  signal?: AbortSignal,
 ): Promise<SearchResult[]> {
   if (type === 'book') {
-    return searchBooks(query);
+    return searchBooks(query, signal);
   }
-  return searchMovies(query);
+  return searchMovies(query, signal);
 }

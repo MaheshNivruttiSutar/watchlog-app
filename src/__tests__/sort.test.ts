@@ -7,14 +7,14 @@ describe('sortByRating', () => {
     const doneItems = mockWatchlist.filter((i) => i.status === 'done');
     const sorted = sortByRating(doneItems, 'desc');
     const ratings = sorted.map((i) => i.rating);
-    expect(ratings).toEqual([5, 4, 4]);
+    expect(ratings).toEqual([5, 4, 4, 3]);
   });
 
   it('sorts by rating ascending (lowest first)', () => {
     const doneItems = mockWatchlist.filter((i) => i.status === 'done');
     const sorted = sortByRating(doneItems, 'asc');
     const ratings = sorted.map((i) => i.rating);
-    expect(ratings).toEqual([4, 4, 5]);
+    expect(ratings).toEqual([3, 4, 4, 5]);
   });
 
   it('puts unrated items at the end when sorting desc', () => {
@@ -30,13 +30,13 @@ describe('sortByRating', () => {
 describe('sortByDateAdded', () => {
   it('sorts by date descending (newest first)', () => {
     const sorted = sortByDateAdded(mockWatchlist, 'desc');
-    expect(sorted[0].title).toBe('The Hobbit');
+    expect(sorted[0].title).toBe('Everything Everywhere All at Once');
     expect(sorted[sorted.length - 1].title).toBe('Inception');
   });
 
   it('sorts by date ascending (oldest first)', () => {
     const sorted = sortByDateAdded(mockWatchlist, 'asc');
     expect(sorted[0].title).toBe('Inception');
-    expect(sorted[sorted.length - 1].title).toBe('The Hobbit');
+    expect(sorted[sorted.length - 1].title).toBe('Everything Everywhere All at Once');
   });
 });

@@ -3,6 +3,7 @@
  * Checks if book + movie APIs return real data.
  */
 
+import 'dotenv/config';
 import { searchBooks, searchMovies } from '../dist/api/search.js';
 import { getPopularContent } from '../dist/api/popular.js';
 import { isTmdbConfigured } from '../dist/config.js';
