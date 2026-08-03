@@ -1,6 +1,18 @@
 # WatchLog — Personal Movie & Book Watchlist
 
-TypeScript data layer (Stage 1) + React UI (Stage 2).
+TypeScript data layer + React multi-page app with routing, fake auth, and theme support.
+
+Track movies and books: search Open Library / TMDB, add them to a watchlist, update status and rating, and see progress on a dashboard.
+
+## Features
+
+- **Dashboard** (`/`) — stats, completion rate, recently added items
+- **Search** (`/add`) — popular titles + search; **login required**
+- **Watchlist** (`/watchlist`) — filter by type and status
+- **Item detail** (`/items/:id`) — status, rating, remove
+- **Login** (`/login`) — demo users seeded into `localStorage`
+- **Theme toggle** — light / dark via sidebar
+- **404 page** — unknown routes
 
 ## Setup
 
@@ -13,11 +25,13 @@ cp .env.example .env   # optional — needed for movie search
 
 | Command | What it does |
 |---------|--------------|
-| `npm run dev` | Start the React app (Vite dev server) |
-| `npm test` | Run unit tests (mocked APIs, fast, offline) |
+| `npm run dev` | Start the React app (Vite) |
+| `npm test` | Unit tests (mocked APIs, offline) |
+| `npm run test:watch` | Vitest in watch mode |
 | `npm run build` | Compile TypeScript library to `dist/` |
 | `npm run build:app` | Build the React app for production |
-| `npm run test:live` | **Live API smoke test** — hits real Open Library + TMDB |
+| `npm run preview` | Preview the production app build |
+| `npm run test:live` | Live API smoke test (Open Library + TMDB) |
 
 ## Environment variables
 
@@ -36,10 +50,46 @@ VITE_TMDB_API_KEY=your_key_here
 - `VITE_TMDB_API_KEY` — used by the browser (React app via Vite)
 
 > `.env` is git-ignored. Use `.env.example` as a template.
+> `VITE_*` vars are bundled for the browser — TMDB keys are meant for client use with rate limits; do not treat them as server-only secrets.
+
+## Demo login
+
+On startup, demo users are written to `localStorage`. Use any of these on `/login`:
+
+| Email | Password |
+|-------|----------|
+| `arjunsharma@demo.com` | `123` |
+| `snehapatel@demo.com` | `123` |
+| `ravikumar@demo.com` | `123` |
+| `priyasingh@demo.com` | `123` |
+| `karanmehta@demo.com` | `123` |
+
+This is **fake auth for practice** (in-memory session, passwords in client storage). It is not secure and is not for production.
+
+After login, you are sent to `/add` (Search). Visiting Search while logged out redirects to `/login`.
+
+## Run the React app
+
+```bash
+npm run dev
+```
+
+Open the URL shown in the terminal (usually `http://localhost:5173`).
+
+### Routes
+
+| Path | Page | Auth |
+|------|------|------|
+| `/` | Dashboard | Public |
+| `/watchlist` | Watchlist list + filters | Public |
+| `/items/:id` | Item detail | Public |
+| `/add` | Search / add | Protected |
+| `/login` | Login | Public |
+| `*` | Not found | Public |
 
 ## Live API test (local)
 
-Tests real book + movie APIs over the internet (not mocked). Useful to verify your TMDB key and network.
+Hits real book + movie APIs (not mocked). Useful to verify your TMDB key and network.
 
 ```bash
 npm run test:live
@@ -72,26 +122,21 @@ If movie tests fail with a network/timeout error, books may still pass — check
 
 Script location: `scripts/test-search.mjs`
 
-## Run the React app
-
-```bash
-npm run dev
-```
-
-Open the URL shown in the terminal (usually `http://localhost:5173`).
-
 ## Project structure
 
 | Area | Purpose |
 |------|---------|
+| `src/pages/` | Route pages — Dashboard, List, Detail, Add/Search, Login, 404 |
+| `src/components/` | UI — Sidebar, cards, grid, search, theme toggle, protected route |
+| `src/context/` | Auth, watchlist, and theme providers |
+| `src/data/` | Demo users + `localStorage` helpers |
+| `src/hooks/` | `useSearch`, `usePopular` — loading, error, results, abort |
+| `src/api/` | Search (Open Library + TMDB), popular content, mappers |
 | `src/types/` | Data shapes for movies, books, status, ratings |
-| `src/utils/` | Filter, sort, group, statistics |
-| `src/api/` | Search (Open Library + TMDB), popular content |
-| `src/components/` | React UI — cards, grid, search, detail panel |
-| `src/context/` | Shared watchlist state |
-| `src/hooks/` | `useSearch` — loading, error, results, abort |
+| `src/utils/` | Filter, sort, group, statistics, theme helpers |
+| `src/config.ts` | Central config / env reads for the app |
 
-## Stage 1 library usage
+## Library usage (TypeScript data layer)
 
 After `npm run build`, import from `dist/` in Node:
 
