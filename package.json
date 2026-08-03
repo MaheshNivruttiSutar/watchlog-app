@@ -6,9 +6,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build:app": "vite build",
+    "build": "vite build",
     "preview": "vite preview",
-    "build": "tsc",
+    "type-check": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:live": "npm run build && node scripts/test-search.mjs"
