@@ -1,39 +1,37 @@
-import WatchlistGrid from './components/WatchlistGrid';
-import DetailPanel from './components/DetailPanel';
-import SearchBar from './components/SearchBar';
-import SearchResults from './components/SearchResults';
-import ThemeToggle from './components/ThemeToggle';
-import { WatchlistProvider, useWatchlist } from './context/WatchlistContext';
+import { Routes, Route } from 'react-router-dom';
+import Sidebar from './components/Sidebar';
+import ProtectedRoute from './components/ProtectedRoute';
+import { WatchlistProvider } from './context/WatchlistContext';
 import { ThemeProvider } from './context/ThemeContext';
-import { useSearch } from './hooks/useSearch';
-import { useMemo } from 'react';
+import { AuthProvider } from './context/AuthContext';
+import DashboardPage from './pages/DashboardPage';
+import ListPage from './pages/ListPage';
+import DetailPage from './pages/DetailPage';
+import AddEditPage from './pages/AddEditPage';
+import LoginPage from './pages/LoginPage';
+import NotFoundPage from './pages/NotFoundPage';
 
-function AppContent() {
-  const { items, addItem, removeItem } = useWatchlist();
-  const { results, loading, error, hasSearched, search } = useSearch();
-
-  const existingIds = useMemo(() => new Set(items.map(i => i.id)), [items]);
-
+function AppLayout() {
   return (
-    <div className="min-h-screen bg-surface p-8">
-      <div className="mb-4 flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-foreground">My WatchLog</h1>
-        <ThemeToggle />
-      </div>
-
-      <SearchBar onSearch={search} loading={loading} error={error} />
-      <SearchResults
-        results={results}
-        hasSearched={hasSearched}
-        onAdd={addItem}
-        onRemove={removeItem}
-        existingIds={Array.from(existingIds)}
-      />
-
-      <div className="flex items-start gap-8">
-        <WatchlistGrid />
-        {items.length > 0 && <DetailPanel />}
-      </div>
+    <div className="app-layout">
+      <Sidebar />
+      <main className="app-main">
+        <Routes>
+          <Route path="/" element={<DashboardPage />} />
+          <Route path="/watchlist" element={<ListPage />} />
+          <Route path="/items/:id" element={<DetailPage />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route
+            path="/add"
+            element={
+              <ProtectedRoute>
+                <AddEditPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route path="*" element={<NotFoundPage />} />
+        </Routes>
+      </main>
     </div>
   );
 }
@@ -41,9 +39,11 @@ function AppContent() {
 function App() {
   return (
     <ThemeProvider>
-      <WatchlistProvider>
-        <AppContent />
-      </WatchlistProvider>
+      <AuthProvider>
+        <WatchlistProvider>
+          <AppLayout />
+        </WatchlistProvider>
+      </AuthProvider>
     </ThemeProvider>
   );
 }

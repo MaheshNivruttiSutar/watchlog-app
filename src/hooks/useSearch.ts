@@ -1,28 +1,21 @@
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 import { search, SearchApiError } from '../api/search';
 import type { ItemType, SearchResult } from '../types/watchlistItem';
 
+/**
+ * useSearch = remember search results in state.
+ *
+ * User clicks Search → we call the API → we save results here.
+ */
 export function useSearch() {
   const [results, setResults] = useState<SearchResult[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [hasSearched, setHasSearched] = useState(false);
 
-  const abortControllerRef = useRef<AbortController | null>(null);
-
-  useEffect(() => {
-    return () => {
-      abortControllerRef.current?.abort();
-    };
-  }, []);
-
   async function runSearch(query: string, type: ItemType) {
-    const trimmed = query.trim();
-
-    abortControllerRef.current?.abort();
-
-    if (!trimmed) {
-      abortControllerRef.current = null;
+    // Empty text → leave "search mode" and show popular again
+    if (!query.trim()) {
       setResults([]);
       setError(null);
       setLoading(false);
@@ -30,32 +23,23 @@ export function useSearch() {
       return;
     }
 
-    const controller = new AbortController();
-    abortControllerRef.current = controller;
-
     setLoading(true);
     setError(null);
 
     try {
-      const data = await search(trimmed, type, controller.signal);
+      const data = await search(query.trim(), type);
       setResults(data);
       setHasSearched(true);
     } catch (err) {
-      if (err instanceof DOMException && err.name === 'AbortError') {
-        return;
-      }
-
       setResults([]);
-
-      if (err instanceof SearchApiError) {
-        setError(err.message);
-      } else {
-        setError('Something went wrong. Please try again.');
-      }
+      setHasSearched(true);
+      setError(
+        err instanceof SearchApiError
+          ? err.message
+          : 'Something went wrong. Please try again.',
+      );
     } finally {
-      if (!controller.signal.aborted) {
-        setLoading(false);
-      }
+      setLoading(false);
     }
   }
 

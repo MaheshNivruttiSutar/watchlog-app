@@ -39,6 +39,7 @@ describe('searchBooks', () => {
     expect(results).toHaveLength(1);
     expect(results[0].title).toBe('The Hobbit');
     expect(results[0].type).toBe('book');
+    expect(results[0].externalId).toBe('works-OL45804W');
     expect(results[0].author).toBe('J.R.R. Tolkien');
     expect(results[0].genres).toEqual(['Fantasy', 'Adventure']);
   });
@@ -135,7 +136,6 @@ describe('search', () => {
     await search('test', 'book');
     expect(fetch).toHaveBeenCalledWith(
       expect.stringContaining('openlibrary.org'),
-      { signal: undefined },
     );
   });
 });

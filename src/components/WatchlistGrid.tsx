@@ -1,23 +1,32 @@
+import { useNavigate } from 'react-router-dom';
 import WatchlistCard from './WatchlistCard';
 import { useWatchlist } from '../context/WatchlistContext';
+import type { WatchlistItem } from '../types/watchlistItem';
 
-function WatchlistGrid() {
-  const { items, selectedId, selectItem, removeItem } = useWatchlist();
+interface WatchlistGridProps {
+  items?: WatchlistItem[];
+}
+
+function WatchlistGrid({ items: itemsProp }: WatchlistGridProps) {
+  const { items: allItems, removeItem } = useWatchlist();
+  const items = itemsProp ?? allItems;
+  const navigate = useNavigate();
 
   if (items.length === 0) {
     return (
-      <p className="text-muted">No items yet. Search for something and add it to your watchlist.</p>
+      <div className="empty-state">
+        <p className="text-muted">No items match these filters.</p>
+      </div>
     );
   }
 
   return (
-    <div className="flex flex-1 flex-wrap justify-start gap-5">
+    <div className="card-grid">
       {items.map((item) => (
         <WatchlistCard
           key={item.id}
           item={item}
-          isSelected={item.id === selectedId}
-          onSelect={selectItem}
+          onSelect={(id) => navigate(`/items/${encodeURIComponent(id)}`)}
           onRemove={removeItem}
         />
       ))}

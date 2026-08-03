@@ -23,20 +23,11 @@ interface OpenLibraryResponse {
   docs?: OpenLibraryDoc[];
 }
 
-function rethrowIfAborted(err: unknown): void {
-  if (err instanceof DOMException && err.name === 'AbortError') {
-    throw err;
-  }
-}
-
 /**
  * Search for books using the free Open Library API.
  * No API key needed.
  */
-export async function searchBooks(
-  query: string,
-  signal?: AbortSignal,
-): Promise<SearchResult[]> {
+export async function searchBooks(query: string): Promise<SearchResult[]> {
   if (!query.trim()) {
     return [];
   }
@@ -45,9 +36,8 @@ export async function searchBooks(
 
   let response: Response;
   try {
-    response = await fetch(url, { signal });
-  } catch (err) {
-    rethrowIfAborted(err);
+    response = await fetch(url);
+  } catch {
     throw new SearchApiError(
       'Network error while searching books',
       'openLibrary',
@@ -78,10 +68,7 @@ interface TmdbSearchResponse {
  * Search for movies using the TMDB API.
  * Requires TMDB_API_KEY environment variable.
  */
-export async function searchMovies(
-  query: string,
-  signal?: AbortSignal,
-): Promise<SearchResult[]> {
+export async function searchMovies(query: string): Promise<SearchResult[]> {
   if (!query.trim()) {
     return [];
   }
@@ -97,9 +84,8 @@ export async function searchMovies(
 
   let response: Response;
   try {
-    response = await fetch(url, { signal });
-  } catch (err) {
-    rethrowIfAborted(err);
+    response = await fetch(url);
+  } catch {
     throw new SearchApiError(
       'Network error while searching movies',
       'tmdb',
@@ -127,10 +113,9 @@ export async function searchMovies(
 export async function search(
   query: string,
   type: ItemType,
-  signal?: AbortSignal,
 ): Promise<SearchResult[]> {
   if (type === 'book') {
-    return searchBooks(query, signal);
+    return searchBooks(query);
   }
-  return searchMovies(query, signal);
+  return searchMovies(query);
 }
