@@ -35,7 +35,7 @@ function LoginPage() {
   }
 
   const inputClass =
-    'block mt-4 mb-4 py-3 px-4 w-full border border-success rounded-button bg-surface-raised text-foreground cursor-pointer';
+    'block mb-4 py-3 px-4 w-full border border-success rounded-button bg-surface-raised text-foreground cursor-pointer';
 
   return (
     <div className="p-page max-w-92.5">
@@ -45,22 +45,40 @@ function LoginPage() {
         arjunsharma@demo.com / 123).
       </p>
       <form onSubmit={handleSubmit}>
+        <label htmlFor="login-email" className="block mt-4 mb-1 text-sm font-medium text-foreground">
+          Email
+          <span className="text-danger" aria-hidden="true">
+            {' '}
+            *
+          </span>
+        </label>
         <input
           required
           className={inputClass}
           type="email"
           placeholder="Enter your email"
+          id="login-email"
           ref={usernameRef}
+          autoComplete="email"
         />
+        <label htmlFor="login-password" className="block mt-4 mb-1 text-sm font-medium text-foreground">
+          Password
+          <span className="text-danger" aria-hidden="true">
+            {' '}
+            *
+          </span>
+        </label>
         <input
           required
           className={inputClass}
           type="password"
           placeholder="Enter your password"
+          id="login-password"
           ref={passwordRef}
+          autoComplete="current-password"
         />
         {error ? (
-          <p className="mt-3 text-sm text-danger" role="alert">
+          <p id="login-error" className="mt-3 text-sm text-danger" role="alert">
             {error}
           </p>
         ) : null}

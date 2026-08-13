@@ -69,10 +69,10 @@ function WatchlistCard({ item, onSelect, onRemove }: WatchlistCardProps) {
             trigger={
               <button
                 type="button"
-                className="px-2 py-0.5 border-0 rounded bg-surface-raised/95 text-xs font-semibold uppercase text-danger cursor-pointer shadow-delete focus-visible:outline-none focus-visible:shadow-focus"
+               className="px-2 py-0.5 border-0 rounded bg-danger text-xs font-semibold uppercase text-surface cursor-pointer transition-[background] duration-150 hover:bg-danger-hover shadow-delete focus-visible:outline-none focus-visible:shadow-focus"
                 aria-label={'Remove ' + item.title}
               >
-                Delete
+              Remove
               </button>
             }
           />
