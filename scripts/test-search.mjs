@@ -4,9 +4,9 @@
  */
 
 import 'dotenv/config';
-import { searchBooks, searchMovies } from '../dist/api/search.js';
-import { getPopularContent } from '../dist/api/popular.js';
-import { isTmdbConfigured } from '../dist/config.js';
+import { searchBooks, searchMovies } from '../lib/api/search.js';
+import { getPopularContent } from '../lib/api/popular.js';
+import { isTmdbConfigured } from '../lib/config.js';
 
 function printResult(label, items) {
   console.log(`\n✅ ${label} — ${items.length} result(s)`);

@@ -1,55 +1,141 @@
 @import "tailwindcss";
 
+/*
+  Design tokens (Tailwind v4 @theme).
+  Namespaces → utilities:
+    --color-*   → bg-*, text-*, border-*, …
+    --spacing-* → p-*, m-*, gap-*, w-*, …
+    --radius-*  → rounded-*
+    --shadow-*  → shadow-*
+*/
+
 @theme {
-  --color-surface: var(--theme-surface);
-  --color-surface-raised: var(--theme-surface-raised);
-  --color-surface-overlay: var(--theme-surface-overlay);
-  --color-border: var(--theme-border);
-  --color-foreground: var(--theme-foreground);
-  --color-accent: var(--theme-accent);
-  --color-accent-hover: var(--theme-accent-hover);
-  --color-accent-muted: var(--theme-accent-muted);
+  /* Colors — light defaults; dark overrides below */
+  --color-surface: #f6f8fa;
+  --color-surface-raised: #ffffff;
+  --color-surface-overlay: #eaeef2;
+  --color-border: #d0d7de;
+  --color-foreground: #1f2328;
+  --color-accent: #0d6e7f;
+  --color-accent-hover: #0a5a68;
+  --color-accent-soft: rgba(13, 110, 127, 0.15);
+  --color-muted: #656d76;
+  --color-success: #1a7f37;
   --color-movie: #ef4444;
   --color-book: #22c55e;
-  --color-muted: var(--theme-muted);
-  --color-success: var(--theme-success);
-  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  --color-danger: #dc2626;
+  --color-danger-hover: #b91c1c;
+  --color-warning: #d97706;
+  --color-disabled: #8b949e;
+
+  /* Status variants — light theme uses solid pastels (not low-alpha washes) */
+  --color-status-want: #334155;
+  --color-status-want-soft: #e2e8f0;
+  --color-status-watching: #0a5a68;
+  --color-status-watching-soft: #c5f0f5;
+  --color-status-reading: #b45309;
+  --color-status-reading-soft: #fde68a;
+  --color-status-done: #15803d;
+  --color-status-done-soft: #bbf7d0;
+
+  /* Spacing — semantic additions on top of Tailwind’s default scale */
+  --spacing-page: 2rem;
+  --spacing-section: 2.5rem;
+  --spacing-card-gap: 1.25rem;
+  --spacing-stat: 1.25rem;
+  --spacing-control: 2.5rem;
+
+  /* Border radius */
+  --radius-button: 0.5rem;
+  --radius-control: 0.625rem;
+  --radius-card: 0.75rem;
+  --radius-chip: 9999px;
+
+  /* Shadows */
+  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-card-hover: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --shadow-focus: 0 0 0 3px var(--color-accent-soft);
+  --shadow-poster: 0 16px 40px rgba(15, 23, 32, 0.18);
+  --shadow-delete: 0 1px 3px rgba(0, 0, 0, 0.15);
+
+  /* Font + animation */
+  --font-sans: 'Avenir Next', system-ui, sans-serif;
+  --animate-not-found-enter: not-found-enter 0.45s ease-out both;
 }
 
-/* Light (default) */
+@keyframes not-found-enter {
+  from {
+    opacity: 0;
+    transform: translateY(0.75rem);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Dark theme: override the same CSS variables Tailwind utilities read */
 :root {
   color-scheme: light;
-
-  --theme-surface: #f6f8fa;
-  --theme-surface-raised: #ffffff;
-  --theme-surface-overlay: #eaeef2;
-  --theme-border: #d0d7de;
-  --theme-foreground: #1f2328;
-  --theme-accent: #6e58e8;
-  --theme-accent-hover: #5a45d6;
-  --theme-accent-muted: #7c72ff;
-  --theme-muted: #656d76;
-  --theme-success: #1a7f37;
 }
 
-/* Dark */
 :root[data-theme='dark'] {
   color-scheme: dark;
+  --color-surface: #0b0e14;
+  --color-surface-raised: #161b22;
+  --color-surface-overlay: #1c2128;
+  --color-border: #30363d;
+  --color-foreground: #f0f6fc;
+  --color-accent: #2bb8c9;
+  --color-accent-hover: #1fa0b0;
+  --color-accent-soft: rgba(43, 184, 201, 0.2);
+  --color-muted: #8b949e;
+  --color-success: #3fb950;
+  --color-movie: #ef4444;
+  --color-book: #22c55e;
+  --color-danger: #f87171;
+  --color-danger-hover: #ef4444;
+  --color-warning: #fbbf24;
+  --color-disabled: #6e7681;
 
-  --theme-surface: #0b0e14;
-  --theme-surface-raised: #161b22;
-  --theme-surface-overlay: #1c2128;
-  --theme-border: #30363d;
-  --theme-foreground: #f0f6fc;
-  --theme-accent: #a594fd;
-  --theme-accent-hover: #8b7cf7;
-  --theme-accent-muted: #7c72ff;
-  --theme-muted: #8b949e;
-  --theme-success: #3fb950;
+  --color-status-want: #8b949e;
+  --color-status-want-soft: rgba(139, 148, 158, 0.16);
+  --color-status-watching: #2bb8c9;
+  --color-status-watching-soft: rgba(43, 184, 201, 0.16);
+  --color-status-reading: #fbbf24;
+  --color-status-reading-soft: rgba(251, 191, 36, 0.16);
+  --color-status-done: #3fb950;
+  --color-status-done-soft: rgba(63, 185, 80, 0.16);
 }
 
 @layer base {
   body {
-    @apply bg-surface font-sans text-foreground antialiased;
+    margin: 0;
+    font-family: var(--font-sans);
+    background: var(--color-surface);
+    color: var(--color-foreground);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  button,
+  input {
+    font: inherit;
+  }
+
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  img {
+    display: block;
+    max-width: 100%;
+  }
+
+  ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
   }
 }

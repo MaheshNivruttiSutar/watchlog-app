@@ -41,6 +41,15 @@ export const TMDB_GENRE_MAP: Record<number, string> = {
   37: 'Western',
 };
 
+/**
+ * Open Library keys look like "/works/OL45804W".
+ * Slashes break React Router's `/items/:id` (one path segment),
+ * so turn them into a URL-safe id: "works-OL45804W".
+ */
+export function toUrlSafeExternalId(key: string): string {
+  return key.replace(/^\//, '').replace(/\//g, '-');
+}
+
 export function mapOpenLibraryDocToSearchResult(
   doc: OpenLibraryDoc,
 ): SearchResult {
@@ -49,7 +58,7 @@ export function mapOpenLibraryDocToSearchResult(
     : undefined;
 
   return {
-    externalId: doc.key!,
+    externalId: toUrlSafeExternalId(doc.key!),
     type: 'book',
     title: doc.title!,
     genres: (doc.subject ?? []).slice(0, 5),

@@ -1,19 +1,24 @@
+import * as Switch from '@radix-ui/react-switch';
 import { useTheme } from '../context/ThemeContext';
 
+/**
+ * Light/dark theme control using Radix Switch.
+ * Keyboard: Space/Enter toggles; focus ring is visible.
+ */
 function ThemeToggle() {
-    const { theme, toggleTheme } = useTheme();
-    const isDark = theme === 'dark';
+  const { theme, toggleTheme } = useTheme();
+  const isDark = theme === 'dark';
 
-    return (
-        <button
-            type="button"
-            onClick={toggleTheme}
-            aria-label={isDark ? 'Switch to light theme' : 'Switch to dark theme'}
-            className="flex h-10 w-10 items-center justify-center rounded-lg border border-border bg-surface-raised text-foreground transition hover:bg-surface-overlay"
-        >
-            {isDark ? '☀️' : '🌙'}
-        </button>
-    );
+  return (
+    <Switch.Root
+      checked={isDark}
+      onCheckedChange={() => toggleTheme()}
+      aria-label={isDark ? 'Switch to light theme' : 'Switch to dark theme'}
+      className="relative inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-chip border border-border bg-surface-overlay transition-colors data-[state=checked]:bg-accent data-[state=checked]:border-accent focus-visible:outline-none focus-visible:shadow-focus"
+    >
+      <Switch.Thumb className="block h-5 w-5 translate-x-0.5 rounded-chip bg-surface-raised shadow-card transition-transform data-[state=checked]:translate-x-[1.35rem]" />
+    </Switch.Root>
+  );
 }
 
 export default ThemeToggle;

@@ -1,83 +1,94 @@
+import type { KeyboardEvent } from 'react';
 import type { WatchlistItem } from '../types/watchlistItem';
+import { badgeClass, cardStatusVariant } from '../styles/ui';
+import ConfirmDeleteDialog from './ConfirmDeleteDialog';
 
 interface WatchlistCardProps {
   item: WatchlistItem;
-  isSelected?: boolean;
   onSelect?: (id: string) => void;
   onRemove: (id: string) => void;
 }
 
-function formatStatus(status: WatchlistItem['status']): string {
-  const labels: Record<WatchlistItem['status'], string> = {
-    want: 'Want',
-    watching: 'Watching',
-    reading: 'Reading',
-    done: 'Completed',
-  };
-  return labels[status];
-}
+const cardBase =
+  'group relative w-44 overflow-hidden border-2 rounded-card bg-surface-raised shadow-card cursor-pointer transition-[border-color,box-shadow] duration-150 hover:shadow-card-hover focus-visible:outline-none focus-visible:shadow-focus';
 
-function WatchlistCard({ item, isSelected = false, onSelect, onRemove }: WatchlistCardProps) {
+function WatchlistCard({ item, onSelect, onRemove }: WatchlistCardProps) {
   const subtitle =
     item.type === 'movie'
-      ? item.releaseYear?.toString() ?? 'Movie'
-      : item.author ?? 'Book';
+      ? String(item.releaseYear || 'Movie')
+      : item.author || 'Book';
+
+  const statusStyle = cardStatusVariant(item.status);
+
+  function openItem() {
+    if (onSelect) onSelect(item.id);
+  }
+
+  function handleKeyDown(event: KeyboardEvent<HTMLElement>) {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      openItem();
+    }
+  }
 
   return (
     <article
-      onClick={() => onSelect?.(item.id)}
-      className={`w-43 cursor-pointer overflow-hidden rounded-xl border bg-surface-raised transition ${isSelected ? 'border-accent' : 'border-border hover:border-accent/50'
-        }`}
+      className={`${cardBase} ${statusStyle.card}`}
+      tabIndex={0}
+      role="link"
+      aria-label={`Open ${item.title}`}
+      onClick={openItem}
+      onKeyDown={handleKeyDown}
     >
-      {/* Cover */}
       <div className="relative aspect-2/3 bg-surface-overlay">
         {item.coverUrl ? (
           <img
             src={item.coverUrl}
-            alt={item.title}
-            className="h-full w-full object-cover"
+            alt=""
+            referrerPolicy="no-referrer"
+            className="w-full h-full object-cover"
           />
         ) : (
-          <div className="flex h-full items-center justify-center text-muted text-sm">
+          <div className="flex items-center justify-center h-full text-sm text-muted">
             No cover
           </div>
         )}
 
-        {/* Type badge */}
-        <span
-          className={`absolute left-2 top-2 rounded px-2 py-0.5 text-xs font-semibold uppercase ${item.type === 'movie' ? 'bg-movie text-white' : 'bg-book text-white'
-            }`}
+        <span className={badgeClass('left', item.type)}>{item.type}</span>
+
+        <div
+          className="absolute top-2 right-2 opacity-0 transition-opacity duration-150 group-hover:opacity-100 group-focus-within:opacity-100 focus-within:opacity-100"
+          onClick={(event) => event.stopPropagation()}
+          onKeyDown={(event) => event.stopPropagation()}
         >
-          {item.type}
-        </span>
+          <ConfirmDeleteDialog
+            title="Remove from watchlist?"
+            description={`“${item.title}” will be removed from your watchlist.`}
+            confirmLabel="Remove"
+            onConfirm={() => onRemove(item.id)}
+            trigger={
+              <button
+                type="button"
+                className="px-2 py-1 border-0 rounded-button bg-surface-raised/95 text-xs font-medium text-danger cursor-pointer shadow-delete focus-visible:outline-none focus-visible:shadow-focus"
+                aria-label={'Remove ' + item.title}
+              >
+                Delete
+              </button>
+            }
+          />
+        </div>
       </div>
 
-      {/* Info */}
       <div className="p-3">
-        <h3 className="truncate font-semibold text-white">{item.title}</h3>
-        <p className="mt-1 truncate text-sm text-muted">{subtitle}</p>
-
-        <div className="mt-2 flex items-center justify-between">
-          <span className="rounded bg-surface-overlay px-0.5 py-0.5 font-semibold text-xs text-accent">
-            {formatStatus(item.status)}
-          </span>
-
-          {item.rating !== null && (
-            <span className="text-xs text-yellow-500">
-              {'★'.repeat(item.rating)}
-            </span>
-          )}
-        </div>
-        <button
-          type="button"
-          className="mt-2 text-xs text-red-400 hover:underline"
-          onClick={(e) => {
-            e.stopPropagation();
-            onRemove(item.id);
-          }}
+        <h3 className="m-0 text-base font-semibold text-foreground truncate">
+          {item.title}
+        </h3>
+        <p className="mt-1 mb-0 text-sm text-muted truncate">{subtitle}</p>
+        <p
+          className={`inline-flex items-center m-0 mt-2 px-2 py-0.5 rounded text-xs font-semibold uppercase tracking-wide ${statusStyle.badge}`}
         >
-          Remove
-        </button>
+          {statusStyle.label}
+        </p>
       </div>
     </article>
   );

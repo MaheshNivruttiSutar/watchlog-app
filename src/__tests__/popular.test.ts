@@ -94,6 +94,7 @@ describe('getPopularBooks', () => {
     expect(results).toHaveLength(1);
     expect(results[0].title).toBe('The Hobbit');
     expect(results[0].type).toBe('book');
+    expect(results[0].externalId).toBe('works-OL45804W');
     expect(results[0].author).toBe('J.R.R. Tolkien');
     expect(fetch).toHaveBeenCalledWith(
       expect.stringContaining('trending/now.json'),

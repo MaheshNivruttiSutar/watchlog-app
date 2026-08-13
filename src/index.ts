@@ -9,10 +9,6 @@
 export type {
   ItemType,
   WatchlistStatus,
-  StarRating,
-  BaseWatchlistItem,
-  MovieItem,
-  BookItem,
   WatchlistItem,
   SearchResult,
   WatchlistStatistics,

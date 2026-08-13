@@ -46,7 +46,7 @@ export async function getPopularMovies(
 
   if (!response.ok) {
     throw new SearchApiError(
-      `TMDB returned status ${response.status}`,
+      `Couldn't load popular movies. Please try again. Returned status code: ${response.status}`,
       'tmdb',
       response.status,
     );
@@ -81,7 +81,7 @@ export async function getPopularBooks(
 
   if (!response.ok) {
     throw new SearchApiError(
-      `Open Library returned status ${response.status}`,
+      `Couldn't load popular books. Please try again. Returned status code: ${response.status}`,
       'openLibrary',
       response.status,
     );

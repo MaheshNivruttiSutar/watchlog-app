@@ -29,10 +29,10 @@ export function calculateStatistics(
     ratedDoneItems.length === 0
       ? null
       : Math.round(
-          (ratedDoneItems.reduce((sum, i) => sum + (i.rating ?? 0), 0) /
-            ratedDoneItems.length) *
-            10,
-        ) / 10;
+        (ratedDoneItems.reduce((sum, i) => sum + (i.rating ?? 0), 0) /
+          ratedDoneItems.length) *
+        10,
+      ) / 10;
 
   return {
     totalItems,

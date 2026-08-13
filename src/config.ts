@@ -22,15 +22,13 @@ export const config = {
 
 /** Read API key at call time so tests and runtime env changes work. */
 export function getTmdbApiKey(): string {
-  if (
-    typeof process !== 'undefined' &&
-    process.env.TMDB_API_KEY !== undefined
-  ) {
-    return process.env.TMDB_API_KEY;
+  // Node (vitest, live script): use process.env — import.meta.env is Vite-only
+  if (typeof process !== 'undefined' && process.versions?.node) {
+    return process.env.TMDB_API_KEY ?? '';
   }
 
-  // Vite exposes only VITE_* vars to the browser
-  const viteKey = import.meta.env.VITE_TMDB_API_KEY;
+  // Browser (Vite): only VITE_* vars are exposed
+  const viteKey = import.meta.env?.VITE_TMDB_API_KEY;
   if (viteKey) {
     return viteKey;
   }
