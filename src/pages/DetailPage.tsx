@@ -1,9 +1,16 @@
+import * as ToggleGroup from '@radix-ui/react-toggle-group';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import ConfirmDeleteDialog from '../components/ConfirmDeleteDialog';
 import RatingInput from '../components/RatingInput';
 import { useWatchlist } from '../context/WatchlistContext';
 import type { ItemType, WatchlistStatus } from '../types/watchlistItem';
-import { btnDanger, cardStatusVariant, textLink, textMuted } from '../styles/ui';
+import {
+  btnDanger,
+  cardStatusVariant,
+  chipToggleItem,
+  textLink,
+  textMuted,
+} from '../styles/ui';
 
 function statusLabel(status: WatchlistStatus, type: ItemType): string {
   if (status === 'want') {
@@ -145,8 +152,42 @@ function DetailPage() {
               aria-label="Item details"
             >
               <div className={detailFact}>
-                <p className={detailFactLabel}>Status</p>
-                <p className={detailFactValue}>{statusText}</p>
+                <p className={detailFactLabel} id={`status-label-${item.id}`}>
+                  Status
+                </p>
+                <ToggleGroup.Root
+                  type="single"
+                  value={item.status}
+                  onValueChange={(next) => {
+                    if (
+                      next === 'want' ||
+                      next === 'watching' ||
+                      next === 'reading' ||
+                      next === 'done'
+                    ) {
+                      updateItem(item.id, { status: next });
+                    }
+                  }}
+                  aria-labelledby={`status-label-${item.id}`}
+                  className="mt-1 flex flex-wrap gap-2"
+                >
+                  <ToggleGroup.Item value="want" className={chipToggleItem}>
+                    Want
+                  </ToggleGroup.Item>
+                  {item.type === 'movie' && (
+                    <ToggleGroup.Item value="watching" className={chipToggleItem}>
+                      Watching
+                    </ToggleGroup.Item>
+                  )}
+                  {item.type === 'book' && (
+                    <ToggleGroup.Item value="reading" className={chipToggleItem}>
+                      Reading
+                    </ToggleGroup.Item>
+                  )}
+                  <ToggleGroup.Item value="done" className={chipToggleItem}>
+                    Done
+                  </ToggleGroup.Item>
+                </ToggleGroup.Root>
               </div>
 
               <div className={detailFact}>
