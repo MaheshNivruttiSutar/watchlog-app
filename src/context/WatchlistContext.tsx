@@ -1,6 +1,7 @@
-import { createContext, useContext, useState, type ReactNode } from 'react';
+import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
 import { mockWatchlist } from '../__tests__/mockData';
 import type { WatchlistItem } from '../types/watchlistItem';
+import { loadWatchlist, saveWatchlist } from '../utils/watchlistStorage';
 
 /**
  * Shared watchlist for the whole app.
@@ -19,7 +20,13 @@ const WatchlistContext = createContext<{
 } | null>(null);
 
 export function WatchlistProvider({ children }: { children: ReactNode }) {
-  const [items, setItems] = useState<WatchlistItem[]>(mockWatchlist);
+  const [items, setItems] = useState<WatchlistItem[]>(
+    () => loadWatchlist() ?? mockWatchlist,
+  );
+
+  useEffect(() => {
+    saveWatchlist(items);
+  }, [items]);
 
   function addItem(item: WatchlistItem) {
     setItems((current) => [...current, item]);
