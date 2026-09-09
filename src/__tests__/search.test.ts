@@ -4,6 +4,7 @@ import {
   searchMovies,
   search,
   SearchApiError,
+  isTransientSearchError,
 } from '../api/search.js';
 
 describe('searchBooks', () => {
@@ -115,6 +116,42 @@ describe('searchMovies', () => {
     await expect(searchMovies('matrix')).rejects.toThrow(
       'TMDB API key is not configured',
     );
+  });
+});
+
+describe('isTransientSearchError', () => {
+  it('retries network failures and 5xx / 429', () => {
+    expect(
+      isTransientSearchError(
+        new SearchApiError('Network error while searching books', 'openLibrary'),
+      ),
+    ).toBe(true);
+    expect(
+      isTransientSearchError(
+        new SearchApiError('TMDB returned status 500', 'tmdb', 500),
+      ),
+    ).toBe(true);
+    expect(
+      isTransientSearchError(
+        new SearchApiError('TMDB returned status 429', 'tmdb', 429),
+      ),
+    ).toBe(true);
+  });
+
+  it('does not retry a missing key or a 4xx', () => {
+    expect(
+      isTransientSearchError(
+        new SearchApiError(
+          'TMDB API key is not configured. Set TMDB_API_KEY environment variable.',
+          'tmdb',
+        ),
+      ),
+    ).toBe(false);
+    expect(
+      isTransientSearchError(
+        new SearchApiError('TMDB returned status 404', 'tmdb', 404),
+      ),
+    ).toBe(false);
   });
 });
 

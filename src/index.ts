@@ -39,6 +39,7 @@ export {
   searchBooks,
   searchMovies,
   SearchApiError,
+  isTransientSearchError,
 } from './api/search.js';
 
 // API popular

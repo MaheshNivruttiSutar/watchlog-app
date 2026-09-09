@@ -1,7 +1,6 @@
 import { Routes, Route } from 'react-router-dom';
 import Sidebar from './components/Sidebar';
 import ProtectedRoute from './components/ProtectedRoute';
-import { WatchlistProvider } from './context/WatchlistContext';
 import { ThemeProvider } from './context/ThemeContext';
 import { AuthProvider } from './context/AuthContext';
 import DashboardPage from './pages/DashboardPage';
@@ -10,6 +9,8 @@ import DetailPage from './pages/DetailPage';
 import AddEditPage from './pages/AddEditPage';
 import LoginPage from './pages/LoginPage';
 import NotFoundPage from './pages/NotFoundPage';
+import { Provider } from 'react-redux';
+import { store } from './store';
 
 function AppLayout() {
   return (
@@ -38,13 +39,13 @@ function AppLayout() {
 
 function App() {
   return (
-    <ThemeProvider>
-      <AuthProvider>
-        <WatchlistProvider>
+    <Provider store={store}>
+      <ThemeProvider>
+        <AuthProvider>
           <AppLayout />
-        </WatchlistProvider>
-      </AuthProvider>
-    </ThemeProvider>
+        </AuthProvider>
+      </ThemeProvider>
+    </Provider>
   );
 }
 

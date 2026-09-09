@@ -1,25 +1,20 @@
 import * as ToggleGroup from '@radix-ui/react-toggle-group';
 import { useState } from 'react';
 import WatchlistGrid from '../components/WatchlistGrid';
-import { useWatchlist } from '../context/WatchlistContext';
-import { calculateStatistics } from '../utils/statistics';
+import { useAppSelector } from '../store/hooks';
+import { selectFilteredWatchlistItems } from '../store/watchlistSelectors';
 import { chipToggleItem } from '../styles/ui';
 import type { ItemType, WatchlistStatus } from '../types/watchlistItem';
 
 function ListPage() {
-  const { items } = useWatchlist();
   const [type, setType] = useState<ItemType | 'all'>('all');
   const [status, setStatus] = useState<WatchlistStatus | 'all'>('all');
   const readingDisabled = type === 'movie';
   const watchingDisabled = type === 'book';
 
-  const stats = calculateStatistics(items);
-
-  const filteredItems = items.filter((item) => {
-    const typeOk = type === 'all' || item.type === type;
-    const statusOk = status === 'all' || item.status === status;
-    return typeOk && statusOk;
-  });
+  const filteredItems = useAppSelector((state) =>
+    selectFilteredWatchlistItems(state, type, status),
+  );
 
   return (
     <div className="p-page">

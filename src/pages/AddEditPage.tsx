@@ -1,9 +1,11 @@
+import { useEffect, useState } from 'react';
 import SearchBar from '../components/SearchBar';
 import SearchResults from '../components/SearchResults';
 import { usePopular } from '../hooks/usePopular';
-import { useSearch } from '../hooks/useSearch';
-import { useWatchlist } from '../context/WatchlistContext';
-import { useEffect, useState } from 'react';
+import { useAppDispatch, useAppSelector } from '../store/hooks';
+import { searchCleared, searchRequested } from '../store/searchSlice';
+import { selectWatchlistItems } from '../store/watchlistSelectors';
+import type { ItemType } from '../types/watchlistItem';
 
 /**
  * Search page.
@@ -14,11 +16,21 @@ import { useEffect, useState } from 'react';
  * 3. User clears search → show popular again
  */
 function AddEditPage() {
-  const search = useSearch();
+  const dispatch = useAppDispatch();
+  const search = useAppSelector((state) => state.search);
   const popular = usePopular();
-  const { items } = useWatchlist();
+  const items = useAppSelector(selectWatchlistItems);
 
   const didSearch = search.hasSearched;
+
+  function handleSearch(query: string, type: ItemType) {
+    if (!query.trim()) {
+      dispatch(searchCleared());
+      return;
+    }
+
+    dispatch(searchRequested({ query, type }));
+  }
 
   const [popularForVisit, setPopularForVisit] = useState(popular.results);
 
@@ -48,7 +60,7 @@ function AddEditPage() {
       </header>
 
       <SearchBar
-        onSearch={search.search}
+        onSearch={handleSearch}
         loading={search.loading}
         error={search.error}
       />

@@ -19,6 +19,22 @@ export class SearchApiError extends Error {
   }
 }
 
+/**
+ * True when another attempt might succeed (wifi blip, 5xx, rate limit).
+ * False for config mistakes and client errors (missing key, 404, 401).
+ */
+export function isTransientSearchError(error: unknown): boolean {
+  if (!(error instanceof SearchApiError)) {
+    return true;
+  }
+
+  if (error.statusCode === undefined) {
+    return error.message.startsWith('Network error');
+  }
+
+  return error.statusCode >= 500 || error.statusCode === 429;
+}
+
 interface OpenLibraryResponse {
   docs?: OpenLibraryDoc[];
 }

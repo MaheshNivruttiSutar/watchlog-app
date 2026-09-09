@@ -2,7 +2,9 @@ import * as ToggleGroup from '@radix-ui/react-toggle-group';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import ConfirmDeleteDialog from '../components/ConfirmDeleteDialog';
 import RatingInput from '../components/RatingInput';
-import { useWatchlist } from '../context/WatchlistContext';
+import { useAppDispatch, useAppSelector } from '../store/hooks';
+import { removeItem, setRating, updateStatus } from '../store/watchlistSlice';
+import { selectWatchlistItems } from '../store/watchlistSelectors';
 import type { ItemType, WatchlistStatus } from '../types/watchlistItem';
 import {
   btnDanger,
@@ -48,7 +50,8 @@ function DetailPage() {
   const { id: rawId } = useParams<{ id: string }>();
   const id = rawId ? decodeURIComponent(rawId) : undefined;
   const navigate = useNavigate();
-  const { items, updateItem, removeItem } = useWatchlist();
+  const items = useAppSelector(selectWatchlistItems);
+  const dispatch = useAppDispatch();
 
   const item = items.find((entry) => entry.id === id);
 
@@ -165,7 +168,7 @@ function DetailPage() {
                       next === 'reading' ||
                       next === 'done'
                     ) {
-                      updateItem(item.id, { status: next });
+                      dispatch(updateStatus({ id: item.id, status: next }));
                     }
                   }}
                   aria-labelledby={`status-label-${item.id}`}
@@ -197,7 +200,9 @@ function DetailPage() {
                 <div className="mt-1.5 flex flex-wrap items-center gap-2">
                   <RatingInput
                     value={item.rating}
-                    onChange={(rating) => updateItem(item.id, { rating })}
+                    onChange={(rating) =>
+                      dispatch(setRating({ id: item.id, rating }))
+                    }
                     aria-labelledby={`rating-label-${item.id}`}
                   />
                   <span className="text-muted text-sm font-medium">
@@ -232,7 +237,7 @@ function DetailPage() {
                 description={`“${item.title}” will be removed from your watchlist.`}
                 confirmLabel="Remove"
                 onConfirm={() => {
-                  removeItem(item.id);
+                  dispatch(removeItem(item.id));
                   navigate('/watchlist');
                 }}
                 trigger={
