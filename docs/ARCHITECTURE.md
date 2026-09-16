@@ -56,18 +56,20 @@ watchLogProject/
     │   ├── sort.ts
     │   ├── group.ts
     │   ├── statistics.ts
+    │   ├── watchlistView.ts  # stats, recent, filtered list (pure)
     │   └── theme.ts
     ├── hooks/
-    │   └── usePopular.ts
+    │   ├── usePopular.ts
+    │   ├── useTitleSearch.ts
+    │   └── useWatchlist.ts
+    ├── query/
+    │   ├── queryClient.ts    # shared Query cache
+    │   ├── keys.ts           # query keys (cache slots)
+    │   └── watchlistApi.ts   # localStorage as a fake server
     ├── store/
-    │   ├── index.ts              # Redux store + saga middleware
-    │   ├── watchlistSlice.ts     # add / remove / status / rating
-    │   ├── watchlistSelectors.ts # stats, recent, filtered list
-    │   ├── searchSlice.ts        # search results / loading / error
-    │   └── searchSaga.ts         # takeLatest + retry transient errors
+    │   └── uiStore.ts        # Zustand: filters, search box, theme
     ├── context/
-    │   ├── AuthContext.tsx
-    │   └── ThemeContext.tsx
+    │   └── AuthContext.tsx
     ├── data/
     │   └── localStorage.tsx  # Demo users + localStorage helpers
     ├── components/
@@ -111,17 +113,18 @@ index.html
   → main.tsx                 # setLocalStorage() seeds demo users
      → BrowserRouter
         → App.tsx
-           → Provider (Redux store)
-              → ThemeProvider
-                 → AuthProvider
-                    → Sidebar + Routes (pages)
+           → QueryClientProvider
+              → AuthProvider
+                 → Sidebar + Routes (pages)
+                    (theme/filters: Zustand `uiStore`)
+              → ReactQueryDevtools (dev only)
 ```
 
 | Step | File | Job |
 |------|------|-----|
 | 1 | `main.tsx` | Find `#root`, seed users, wrap in router |
-| 2 | `App.tsx` | Redux Provider, auth/theme contexts, map URLs to pages |
-| 3 | Pages | Screens; watchlist via Redux, search via hooks |
+| 2 | `App.tsx` | QueryClientProvider, auth context, map URLs to pages |
+| 3 | Pages | Watchlist/search via TanStack Query; filters/theme via Zustand |
 
 ---
 
@@ -133,16 +136,17 @@ index.html
 | Config | `src/config.ts` | API base URLs + `getTmdbApiKey()` — all env reads here |
 | API | `src/api/` | Fetch Open Library / TMDB; mappers clean external JSON |
 | Utils | `src/utils/` | Pure helpers: filter, sort, group, statistics (easy to test) |
-| Hooks | `src/hooks/` | Async UI glue: loading, error, results, abort |
-| Store | `src/store/` | Watchlist items, actions, and derived selectors |
-| Context | `src/context/` | Shared UI state: auth, theme |
+| Hooks | `src/hooks/` | TanStack Query hooks: search, popular, watchlist |
+| Query | `src/query/` | QueryClient, keys, fake watchlist API |
+| Store | `src/store/` | Zustand `uiStore`: filters, search box, theme |
+| Context | `src/context/` | Shared UI state: auth |
 | Data | `src/data/` | Demo users in `localStorage` |
 | Components | `src/components/` | Reusable UI widgets |
 | Pages | `src/pages/` | One screen per route |
 | Styles | `src/styles/` | Global CSS + shared UI class helpers |
 | Tests | `src/__tests__/` | Unit tests (mocked APIs) + shared mock watchlist |
 
-**Rule of thumb:** pages dispatch/select watchlist from Redux; hooks still call `api/` for search; UI never talks to raw TMDB/Open Library field names (mappers handle that).
+**Rule of thumb:** pages read watchlist/search from TanStack Query; filters/theme from Zustand; UI never talks to raw TMDB/Open Library field names (mappers handle that).
 
 ---
 
@@ -163,32 +167,31 @@ index.html
 
 | Source | Holds |
 |--------|--------|
-| Redux `watchlist` slice | Items + `addItem` / `removeItem` / `updateStatus` / `setRating` |
+| TanStack Query `watchlist` | Items via `watchlistApi` (`localStorage`) |
+| TanStack Query `search` / `popular` | Cached API results |
+| Zustand `uiStore` | List filters, search box, light / dark theme |
 | `AuthContext` | Current user, `login` / `logout` (fake auth) |
-| `ThemeContext` | Light / dark theme |
 
-**Persistence note:** demo **users** and the **watchlist** are stored in `localStorage`. The watchlist loads via `loadWatchlist()` (falls back to `mockWatchlist`) and saves on every store change. Auth is for practice only (not production-safe).
+**Persistence note:** demo **users** and the **watchlist** are stored in `localStorage`. Query loads the list through `fetchWatchlist()` (falls back to `mockWatchlist`). Rating updates are optimistic: the cache changes first, then reverts if the fake API throws. Auth is for practice only (not production-safe).
 
 ---
 
 ## Data flow (search → add)
 
 ```
-User types in SearchBar
+User types in SearchBar (Zustand) and submits
         ↓
-dispatch(searchRequested)
+useTitleSearch → queryKey ['search', type, query]
         ↓
-search saga (takeLatest) → api/search.ts  →  Open Library / TMDB
+api/search.ts  →  Open Library / TMDB
         ↓
-searchSucceeded / searchFailed
-        ↓
-mappers.ts  →  SearchResult[]
+cached SearchResult[]
         ↓
 User clicks Add
         ↓
-dispatch(addItem(...))
+useAddWatchlistItem → watchlistApi → localStorage
         ↓
-ListPage / Dashboard / Detail read the same store via selectors
+ListPage / Dashboard / Detail read queryKeys.watchlist
 ```
 
 ---

@@ -1,19 +1,23 @@
 import * as ToggleGroup from '@radix-ui/react-toggle-group';
-import { useState } from 'react';
 import WatchlistGrid from '../components/WatchlistGrid';
-import { useAppSelector } from '../store/hooks';
-import { selectFilteredWatchlistItems } from '../store/watchlistSelectors';
+import { useWatchlistQuery } from '../hooks/useWatchlist';
+import { useUiStore } from '../store/uiStore';
 import { chipToggleItem } from '../styles/ui';
-import type { ItemType, WatchlistStatus } from '../types/watchlistItem';
+import { getFilteredWatchlistItems } from '../utils/watchlistView';
 
 function ListPage() {
-  const [type, setType] = useState<ItemType | 'all'>('all');
-  const [status, setStatus] = useState<WatchlistStatus | 'all'>('all');
-  const readingDisabled = type === 'movie';
-  const watchingDisabled = type === 'book';
+  const listType = useUiStore((state) => state.listType);
+  const listStatus = useUiStore((state) => state.listStatus);
+  const setListType = useUiStore((state) => state.setListType);
+  const setListStatus = useUiStore((state) => state.setListStatus);
+  const readingDisabled = listType === 'movie';
+  const watchingDisabled = listType === 'book';
 
-  const filteredItems = useAppSelector((state) =>
-    selectFilteredWatchlistItems(state, type, status),
+  const watchlist = useWatchlistQuery();
+  const filteredItems = getFilteredWatchlistItems(
+    watchlist.data ?? [],
+    listType,
+    listStatus,
   );
 
   return (
@@ -29,14 +33,10 @@ function ListPage() {
 
       <ToggleGroup.Root
         type="single"
-        value={type}
+        value={listType}
         onValueChange={(next) => {
           if (next !== 'all' && next !== 'movie' && next !== 'book') return;
-
-          setType(next);
-
-          if (next === 'movie' && status === 'reading') setStatus('all');
-          if (next === 'book' && status === 'watching') setStatus('all');
+          setListType(next);
         }}
         aria-label="Filter by type"
         className="flex flex-wrap gap-2 mb-4"
@@ -54,7 +54,7 @@ function ListPage() {
 
       <ToggleGroup.Root
         type="single"
-        value={status}
+        value={listStatus}
         onValueChange={(next) => {
           if (
             next === 'all' ||
@@ -63,7 +63,7 @@ function ListPage() {
             next === 'reading' ||
             next === 'done'
           ) {
-            setStatus(next);
+            setListStatus(next);
           }
         }}
         aria-label="Filter by status"

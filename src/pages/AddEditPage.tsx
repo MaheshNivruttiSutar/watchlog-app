@@ -2,51 +2,51 @@ import { useEffect, useState } from 'react';
 import SearchBar from '../components/SearchBar';
 import SearchResults from '../components/SearchResults';
 import { usePopular } from '../hooks/usePopular';
-import { useAppDispatch, useAppSelector } from '../store/hooks';
-import { searchCleared, searchRequested } from '../store/searchSlice';
-import { selectWatchlistItems } from '../store/watchlistSelectors';
-import type { ItemType } from '../types/watchlistItem';
+import { searchErrorMessage, useTitleSearch } from '../hooks/useTitleSearch';
+import { useWatchlistQuery } from '../hooks/useWatchlist';
+import type { ItemType, SearchResult } from '../types/watchlistItem';
 
-/**
- * Search page.
- *
- * Step by step:
- * 1. Page opens → show popular titles
- * 2. User searches → show search results
- * 3. User clears search → show popular again
- */
 function AddEditPage() {
-  const dispatch = useAppDispatch();
-  const search = useAppSelector((state) => state.search);
-  const popular = usePopular();
-  const items = useAppSelector(selectWatchlistItems);
+  const [submittedQuery, setSubmittedQuery] = useState('');
+  const [submittedType, setSubmittedType] = useState<ItemType>('movie');
+  const [hasSearched, setHasSearched] = useState(false);
 
-  const didSearch = search.hasSearched;
+  const search = useTitleSearch(submittedQuery, submittedType, hasSearched);
+  const popular = usePopular();
+  const watchlist = useWatchlistQuery();
+  const items = watchlist.data ?? [];
 
   function handleSearch(query: string, type: ItemType) {
     if (!query.trim()) {
-      dispatch(searchCleared());
+      setHasSearched(false);
+      setSubmittedQuery('');
       return;
     }
 
-    dispatch(searchRequested({ query, type }));
+    setSubmittedType(type);
+    setSubmittedQuery(query.trim());
+    setHasSearched(true);
   }
 
-  const [popularForVisit, setPopularForVisit] = useState(popular.results);
+  const [popularForVisit, setPopularForVisit] = useState<SearchResult[]>([]);
 
   useEffect(() => {
-    if (popular.loading) return;
+    if (popular.isPending) return;
 
     const savedIds = new Set(items.map((item) => item.id));
     setPopularForVisit(
-      popular.results.filter((result) => {
+      (popular.data ?? []).filter((result) => {
         const id = result.type + '-' + result.externalId;
         return !savedIds.has(id);
       }),
     );
     // Intentionally omit `items`: re-filter only on popular fetch / page remount.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [popular.results, popular.loading]);
+  }, [popular.data, popular.isPending]);
+
+  const searchError = search.isError ? searchErrorMessage(search.error) : null;
+  const popularError =
+    popular.isError ? searchErrorMessage(popular.error) : null;
 
   return (
     <div className="p-page">
@@ -61,29 +61,29 @@ function AddEditPage() {
 
       <SearchBar
         onSearch={handleSearch}
-        loading={search.loading}
-        error={search.error}
+        loading={search.isFetching}
+        error={searchError}
       />
 
-      {!didSearch && popular.error && (
+      {!hasSearched && popularError && (
         <p className="mb-4 text-sm text-warning" role="status">
-          {popular.error}
+          {popularError}
         </p>
       )}
 
-      {didSearch ? (
+      {hasSearched ? (
         <SearchResults
-          results={search.results}
+          results={search.data ?? []}
           heading="Search results"
           emptyMessage="No results found. Try a different search."
-          loading={search.loading}
+          loading={search.isFetching}
         />
       ) : (
         <SearchResults
           results={popularForVisit}
           heading="Popular right now"
           emptyMessage="No popular titles available right now. Search for something new."
-          loading={popular.loading}
+          loading={popular.isPending}
         />
       )}
     </div>

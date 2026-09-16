@@ -1,19 +1,15 @@
 import { useNavigate } from 'react-router-dom';
 import WatchlistCard from './WatchlistCard';
-import { useAppDispatch, useAppSelector } from '../store/hooks';
-import { removeItem } from '../store/watchlistSlice';
-import { selectWatchlistItems } from '../store/watchlistSelectors';
+import { useRemoveWatchlistItem } from '../hooks/useWatchlist';
 import type { WatchlistItem } from '../types/watchlistItem';
 import { textMuted } from '../styles/ui';
 
 interface WatchlistGridProps {
-  items?: WatchlistItem[];
+  items: WatchlistItem[];
 }
 
-function WatchlistGrid({ items: itemsProp }: WatchlistGridProps) {
-  const allItems = useAppSelector(selectWatchlistItems);
-  const dispatch = useAppDispatch();
-  const items = itemsProp ?? allItems;
+function WatchlistGrid({ items }: WatchlistGridProps) {
+  const removeItem = useRemoveWatchlistItem();
   const navigate = useNavigate();
 
   if (items.length === 0) {
@@ -31,7 +27,7 @@ function WatchlistGrid({ items: itemsProp }: WatchlistGridProps) {
           key={item.id}
           item={item}
           onSelect={(id) => navigate(`/items/${encodeURIComponent(id)}`)}
-          onRemove={(id) => dispatch(removeItem(id))}
+          onRemove={(id) => removeItem.mutate(id)}
         />
       ))}
     </div>

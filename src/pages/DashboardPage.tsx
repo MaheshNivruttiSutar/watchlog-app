@@ -1,18 +1,22 @@
 import { Link, useNavigate } from 'react-router-dom';
 import WatchlistCard from '../components/WatchlistCard';
-import { useAppDispatch, useAppSelector } from '../store/hooks';
-import { removeItem } from '../store/watchlistSlice';
 import {
-  selectRecentlyAdded,
-  selectWatchlistStatistics,
-} from '../store/watchlistSelectors';
+  useRemoveWatchlistItem,
+  useWatchlistQuery,
+} from '../hooks/useWatchlist';
 import { textLink, textMuted } from '../styles/ui';
+import {
+  getRecentlyAdded,
+  getWatchlistStatistics,
+} from '../utils/watchlistView';
 
 function DashboardPage() {
   const navigate = useNavigate();
-  const stats = useAppSelector(selectWatchlistStatistics);
-  const recentlyAdded = useAppSelector(selectRecentlyAdded);
-  const dispatch = useAppDispatch();
+  const watchlist = useWatchlistQuery();
+  const removeItem = useRemoveWatchlistItem();
+  const items = watchlist.data ?? [];
+  const stats = getWatchlistStatistics(items);
+  const recentlyAdded = getRecentlyAdded(items);
 
   return (
     <div className="p-page">
@@ -106,7 +110,7 @@ function DashboardPage() {
                 key={item.id}
                 item={item}
                 onSelect={(id) => navigate(`/items/${encodeURIComponent(id)}`)}
-                onRemove={(id) => dispatch(removeItem(id))}
+                onRemove={(id) => removeItem.mutate(id)}
               />
             ))}
           </div>

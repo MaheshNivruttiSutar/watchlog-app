@@ -1,5 +1,6 @@
 import * as ToggleGroup from '@radix-ui/react-toggle-group';
-import { useState, type FormEvent } from 'react';
+import { type FormEvent } from 'react';
+import { useUiStore } from '../store/uiStore';
 import type { ItemType } from '../types/watchlistItem';
 import { btnPrimary, btnSearch, typeChipToggleItem } from '../styles/ui';
 
@@ -10,8 +11,11 @@ interface SearchBarProps {
 }
 
 function SearchBar({ onSearch, loading, error }: SearchBarProps) {
-  const [query, setQuery] = useState('');
-  const [type, setType] = useState<ItemType>('movie');
+  const query = useUiStore((state) => state.searchQuery);
+  const type = useUiStore((state) => state.searchType);
+  const setSearchQuery = useUiStore((state) => state.setSearchQuery);
+  const setSearchType = useUiStore((state) => state.setSearchType);
+  const clearSearchQuery = useUiStore((state) => state.clearSearchQuery);
 
   function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -19,7 +23,7 @@ function SearchBar({ onSearch, loading, error }: SearchBarProps) {
   }
 
   function clearSearch() {
-    setQuery('');
+    clearSearchQuery();
     onSearch('', type);
   }
 
@@ -32,7 +36,7 @@ function SearchBar({ onSearch, loading, error }: SearchBarProps) {
               id="search-query"
               type="text"
               value={query}
-              onChange={(e) => setQuery(e.target.value)}
+              onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Titles, authors, directors..."
               aria-label="Search titles, authors, or directors"
               className="box-border w-full h-control pr-10 pl-4 border border-border rounded-control bg-surface-raised text-foreground placeholder:text-muted focus:outline-none focus:border-accent focus:shadow-focus"
@@ -54,7 +58,7 @@ function SearchBar({ onSearch, loading, error }: SearchBarProps) {
             value={type}
             onValueChange={(next) => {
               // Keep a type selected — ignore clear-on-reclick from Radix.
-              if (next === 'movie' || next === 'book') setType(next);
+              if (next === 'movie' || next === 'book') setSearchType(next);
             }}
             aria-label="Search media type"
             className="flex gap-2"

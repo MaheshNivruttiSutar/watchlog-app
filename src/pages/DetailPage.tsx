@@ -1,10 +1,14 @@
 import * as ToggleGroup from '@radix-ui/react-toggle-group';
+import { useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import ConfirmDeleteDialog from '../components/ConfirmDeleteDialog';
 import RatingInput from '../components/RatingInput';
-import { useAppDispatch, useAppSelector } from '../store/hooks';
-import { removeItem, setRating, updateStatus } from '../store/watchlistSlice';
-import { selectWatchlistItems } from '../store/watchlistSelectors';
+import {
+  useRemoveWatchlistItem,
+  useUpdateWatchlistRating,
+  useUpdateWatchlistStatus,
+  useWatchlistQuery,
+} from '../hooks/useWatchlist';
 import type { ItemType, WatchlistStatus } from '../types/watchlistItem';
 import {
   btnDanger,
@@ -50,10 +54,22 @@ function DetailPage() {
   const { id: rawId } = useParams<{ id: string }>();
   const id = rawId ? decodeURIComponent(rawId) : undefined;
   const navigate = useNavigate();
-  const items = useAppSelector(selectWatchlistItems);
-  const dispatch = useAppDispatch();
+  const watchlist = useWatchlistQuery();
+  const removeItem = useRemoveWatchlistItem();
+  const updateStatus = useUpdateWatchlistStatus();
+  const setRating = useUpdateWatchlistRating();
+  const [simulateRatingFailure, setSimulateRatingFailure] = useState(false);
+  const items = watchlist.data ?? [];
 
   const item = items.find((entry) => entry.id === id);
+
+  if (watchlist.isPending) {
+    return (
+      <div className="p-page">
+        <p className={textMuted}>Loading…</p>
+      </div>
+    );
+  }
 
   if (!item) {
     return (
@@ -168,7 +184,7 @@ function DetailPage() {
                       next === 'reading' ||
                       next === 'done'
                     ) {
-                      dispatch(updateStatus({ id: item.id, status: next }));
+                      updateStatus.mutate({ id: item.id, status: next });
                     }
                   }}
                   aria-labelledby={`status-label-${item.id}`}
@@ -201,7 +217,11 @@ function DetailPage() {
                   <RatingInput
                     value={item.rating}
                     onChange={(rating) =>
-                      dispatch(setRating({ id: item.id, rating }))
+                      setRating.mutate({
+                        id: item.id,
+                        rating,
+                        simulateFailure: simulateRatingFailure,
+                      })
                     }
                     aria-labelledby={`rating-label-${item.id}`}
                   />
@@ -209,6 +229,21 @@ function DetailPage() {
                     {item.rating !== null ? `${item.rating} / 5` : 'Not rated yet'}
                   </span>
                 </div>
+                <label className="mt-3 flex items-center gap-2 text-sm text-muted">
+                  <input
+                    type="checkbox"
+                    checked={simulateRatingFailure}
+                    onChange={(event) =>
+                      setSimulateRatingFailure(event.target.checked)
+                    }
+                  />
+                  Simulate server failure
+                </label>
+                {setRating.isError ? (
+                  <p className="m-0 mt-2 text-sm text-danger" role="alert">
+                    Rating was reverted. The server rejected the save.
+                  </p>
+                ) : null}
               </div>
 
               {year != null && (
@@ -237,7 +272,7 @@ function DetailPage() {
                 description={`“${item.title}” will be removed from your watchlist.`}
                 confirmLabel="Remove"
                 onConfirm={() => {
-                  dispatch(removeItem(item.id));
+                  removeItem.mutate(item.id);
                   navigate('/watchlist');
                 }}
                 trigger={

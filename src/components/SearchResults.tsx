@@ -1,6 +1,8 @@
-import { useAppDispatch, useAppSelector } from '../store/hooks';
-import { addItem, removeItem } from '../store/watchlistSlice';
-import { selectWatchlistItems } from '../store/watchlistSelectors';
+import {
+  useAddWatchlistItem,
+  useRemoveWatchlistItem,
+  useWatchlistQuery,
+} from '../hooks/useWatchlist';
 import type { SearchResult, WatchlistItem } from '../types/watchlistItem';
 import { badgeClass, btnDanger, btnPrimary, textMuted } from '../styles/ui';
 
@@ -40,8 +42,10 @@ function SearchResults({
   emptyMessage = 'No results found. Try a different search.',
   loading = false,
 }: SearchResultsProps) {
-  const items = useAppSelector(selectWatchlistItems);
-  const dispatch = useAppDispatch();
+  const watchlist = useWatchlistQuery();
+  const addItem = useAddWatchlistItem();
+  const removeItem = useRemoveWatchlistItem();
+  const items = watchlist.data ?? [];
 
   if (loading && results.length === 0) {
     return (
@@ -74,9 +78,9 @@ function SearchResults({
 
           function handleClick() {
             if (alreadyAdded) {
-              dispatch(removeItem(id));
+              removeItem.mutate(id);
             } else {
-              dispatch(addItem(makeWatchlistItem(result)));
+              addItem.mutate(makeWatchlistItem(result));
             }
           }
 

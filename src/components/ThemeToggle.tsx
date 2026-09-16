@@ -1,12 +1,13 @@
 import * as Switch from '@radix-ui/react-switch';
-import { useTheme } from '../context/ThemeContext';
+import { useUiStore } from '../store/uiStore';
 
 /**
  * Light/dark theme control using Radix Switch.
  * Keyboard: Space/Enter toggles; focus ring is visible.
  */
 function ThemeToggle() {
-  const { theme, toggleTheme } = useTheme();
+  const theme = useUiStore((state) => state.theme);
+  const toggleTheme = useUiStore((state) => state.toggleTheme);
   const isDark = theme === 'dark';
 
   return (

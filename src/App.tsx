@@ -1,7 +1,8 @@
+import { QueryClientProvider } from '@tanstack/react-query';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { Routes, Route } from 'react-router-dom';
 import Sidebar from './components/Sidebar';
 import ProtectedRoute from './components/ProtectedRoute';
-import { ThemeProvider } from './context/ThemeContext';
 import { AuthProvider } from './context/AuthContext';
 import DashboardPage from './pages/DashboardPage';
 import ListPage from './pages/ListPage';
@@ -9,8 +10,7 @@ import DetailPage from './pages/DetailPage';
 import AddEditPage from './pages/AddEditPage';
 import LoginPage from './pages/LoginPage';
 import NotFoundPage from './pages/NotFoundPage';
-import { Provider } from 'react-redux';
-import { store } from './store';
+import { queryClient } from './query/queryClient';
 
 function AppLayout() {
   return (
@@ -39,13 +39,14 @@ function AppLayout() {
 
 function App() {
   return (
-    <Provider store={store}>
-      <ThemeProvider>
-        <AuthProvider>
-          <AppLayout />
-        </AuthProvider>
-      </ThemeProvider>
-    </Provider>
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <AppLayout />
+      </AuthProvider>
+      {import.meta.env.DEV ? (
+        <ReactQueryDevtools initialIsOpen buttonPosition="bottom-left" />
+      ) : null}
+    </QueryClientProvider>
   );
 }
 
