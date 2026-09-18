@@ -1,4 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { i18n } from '../i18n/index.js';
+import { LOCALE_STORAGE_KEY } from '../i18n/locale.js';
 import { useUiStore } from '../store/uiStore.js';
 import { THEME_STORAGE_KEY } from '../utils/theme.js';
 
@@ -8,6 +10,7 @@ const uiDefaults = {
   searchQuery: '',
   searchType: 'movie' as const,
   theme: 'light' as const,
+  locale: 'en' as const,
 };
 
 function createMemoryStorage(): Storage {
@@ -38,12 +41,13 @@ function createMemoryStorage(): Storage {
 beforeEach(() => {
   vi.stubGlobal('localStorage', createMemoryStorage());
   vi.stubGlobal('document', {
-    documentElement: { dataset: {} as Record<string, string> },
+    documentElement: { dataset: {} as Record<string, string>, lang: 'en' },
   });
 });
 
 afterEach(() => {
   useUiStore.setState(uiDefaults);
+  void i18n.changeLanguage('en');
   vi.unstubAllGlobals();
 });
 
@@ -93,5 +97,15 @@ describe('uiStore', () => {
     useUiStore.getState().toggleTheme();
     expect(useUiStore.getState().theme).toBe('light');
     expect(localStorage.getItem(THEME_STORAGE_KEY)).toBe('light');
+  });
+
+  it('switches locale and persists it', async () => {
+    useUiStore.getState().setLocale('hi');
+    expect(useUiStore.getState().locale).toBe('hi');
+    expect(localStorage.getItem(LOCALE_STORAGE_KEY)).toBe('hi');
+    expect(document.documentElement.lang).toBe('hi');
+    await vi.waitFor(() => {
+      expect(i18n.language).toBe('hi');
+    });
   });
 });

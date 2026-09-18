@@ -58,8 +58,14 @@ watchLogProject/
     │   ├── statistics.ts
     │   ├── watchlistView.ts  # stats, recent, filtered list (pure)
     │   └── theme.ts
+    ├── i18n/
+    │   ├── en.ts             # English catalog (source of truth for keys)
+    │   ├── hi.ts             # Hindi catalog
+    │   ├── locale.ts         # Locale type + localStorage helpers
+    │   └── index.ts          # i18next init
     ├── hooks/
     │   ├── usePopular.ts
+    │   ├── useDebouncedValue.ts
     │   ├── useTitleSearch.ts
     │   └── useWatchlist.ts
     ├── query/
@@ -72,13 +78,18 @@ watchLogProject/
     │   └── AuthContext.tsx
     ├── data/
     │   └── localStorage.tsx  # Demo users + localStorage helpers
+    ├── debug/
+    │   └── renderCounts.ts   # Dev-only search profile counters
     ├── components/
     │   ├── Sidebar.tsx
+    │   ├── LanguageToggle.tsx
     │   ├── ProtectedRoute.tsx
     │   ├── SearchBar.tsx
     │   ├── SearchResults.tsx
-    │   ├── WatchlistCard.tsx
-    │   ├── WatchlistGrid.tsx
+    │   ├── SearchResultCard.tsx
+    │   ├── SearchProfileHud.tsx  # Dev HUD when watchlog-profile=1
+    │   ├── WatchlistCard.tsx   # Card / Cover / Meta / Remove (compound parts)
+    │   ├── WatchlistGrid.tsx   # Grid root + empty state; attaches Card parts
     │   ├── RatingInput.tsx
     │   ├── ConfirmDeleteDialog.tsx
     │   └── ThemeToggle.tsx
@@ -110,21 +121,21 @@ Ignore `node_modules/` (installed packages). Treat `dist/` and `lib/` as build o
 
 ```
 index.html
-  → main.tsx                 # setLocalStorage() seeds demo users
+  → main.tsx                 # i18n init, seed users, mount React
      → BrowserRouter
         → App.tsx
            → QueryClientProvider
               → AuthProvider
                  → Sidebar + Routes (pages)
-                    (theme/filters: Zustand `uiStore`)
+                    (theme/filters/locale: Zustand `uiStore`)
               → ReactQueryDevtools (dev only)
 ```
 
 | Step | File | Job |
 |------|------|-----|
-| 1 | `main.tsx` | Find `#root`, seed users, wrap in router |
+| 1 | `main.tsx` | Load i18n, find `#root`, seed users, wrap in router |
 | 2 | `App.tsx` | QueryClientProvider, auth context, map URLs to pages |
-| 3 | Pages | Watchlist/search via TanStack Query; filters/theme via Zustand |
+| 3 | Pages | Watchlist/search via TanStack Query; filters/theme/locale via Zustand |
 
 ---
 
@@ -137,6 +148,7 @@ index.html
 | API | `src/api/` | Fetch Open Library / TMDB; mappers clean external JSON |
 | Utils | `src/utils/` | Pure helpers: filter, sort, group, statistics (easy to test) |
 | Hooks | `src/hooks/` | TanStack Query hooks: search, popular, watchlist |
+| i18n | `src/i18n/` | English/Hindi catalogs + i18next; UI reads strings via `t()` |
 | Query | `src/query/` | QueryClient, keys, fake watchlist API |
 | Store | `src/store/` | Zustand `uiStore`: filters, search box, theme |
 | Context | `src/context/` | Shared UI state: auth |
@@ -169,7 +181,7 @@ index.html
 |--------|--------|
 | TanStack Query `watchlist` | Items via `watchlistApi` (`localStorage`) |
 | TanStack Query `search` / `popular` | Cached API results |
-| Zustand `uiStore` | List filters, search box, light / dark theme |
+| Zustand `uiStore` | List filters, search box, light / dark theme, UI locale |
 | `AuthContext` | Current user, `login` / `logout` (fake auth) |
 
 **Persistence note:** demo **users** and the **watchlist** are stored in `localStorage`. Query loads the list through `fetchWatchlist()` (falls back to `mockWatchlist`). Rating updates are optimistic: the cache changes first, then reverts if the fake API throws. Auth is for practice only (not production-safe).
@@ -179,13 +191,19 @@ index.html
 ## Data flow (search → add)
 
 ```
-User types in SearchBar (Zustand) and submits
+User types in SearchBar (urgent Zustand update)
+        ↓
+useDebouncedValue waits for 300 ms of quiet
         ↓
 useTitleSearch → queryKey ['search', type, query]
         ↓
 api/search.ts  →  Open Library / TMDB
         ↓
 cached SearchResult[]
+        ↓
+useDeferredValue lets React schedule the result-list render
+        ↓
+memoized SearchResultCard skips unchanged cards
         ↓
 User clicks Add
         ↓

@@ -37,25 +37,21 @@ export function badgeClass(position: 'left' | 'right', type: 'movie' | 'book'): 
  */
 export const cardStatusVariants: Record<
   WatchlistStatus,
-  { label: string; card: string; badge: string }
+  { card: string; badge: string }
 > = {
-  want: { 
-    label: 'Want',
+  want: {
     card: 'border-status-want/55 hover:border-status-want',
     badge: 'bg-status-want-soft text-status-want ring-1 ring-inset ring-status-want/25',
   },
   watching: {
-    label: 'Watching',
     card: 'border-status-watching/65 hover:border-status-watching',
     badge: 'bg-status-watching-soft text-status-watching ring-1 ring-inset ring-status-watching/30',
   },
   reading: {
-    label: 'Reading',
     card: 'border-status-reading/65 hover:border-status-reading',
     badge: 'bg-status-reading-soft text-status-reading ring-1 ring-inset ring-status-reading/35',
   },
   done: {
-    label: 'Done',
     card: 'border-status-done/65 hover:border-status-done',
     badge: 'bg-status-done-soft text-status-done ring-1 ring-inset ring-status-done/30',
   },

@@ -1,5 +1,6 @@
 import * as Dialog from '@radix-ui/react-dialog';
 import { useState, type ReactElement } from 'react';
+import { useTranslation } from 'react-i18next';
 import { btnDanger, btnSecondary } from '../styles/ui';
 
 interface ConfirmDeleteDialogProps {
@@ -20,10 +21,11 @@ interface ConfirmDeleteDialogProps {
 function ConfirmDeleteDialog({
   title,
   description,
-  confirmLabel = 'Remove',
+  confirmLabel,
   trigger,
   onConfirm,
 }: ConfirmDeleteDialogProps) {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
 
   return (
@@ -43,7 +45,7 @@ function ConfirmDeleteDialog({
           <div className="mt-6 flex flex-wrap justify-end gap-3">
             <Dialog.Close asChild>
               <button type="button" className={btnSecondary}>
-                Cancel
+                {t('common.cancel')}
               </button>
             </Dialog.Close>
             <button
@@ -54,7 +56,7 @@ function ConfirmDeleteDialog({
                 setOpen(false);
               }}
             >
-              {confirmLabel}
+              {confirmLabel ?? t('common.remove')}
             </button>
           </div>
         </Dialog.Content>

@@ -1,4 +1,11 @@
 import { create } from 'zustand';
+import { applyLocale } from '../i18n';
+import {
+  DEFAULT_LOCALE,
+  getInitialLocale,
+  LOCALE_STORAGE_KEY,
+  type Locale,
+} from '../i18n/locale';
 import type { ItemType, WatchlistStatus } from '../types/watchlistItem';
 import {
   applyTheme,
@@ -24,6 +31,11 @@ function readInitialTheme(): Theme {
   return getInitialTheme();
 }
 
+function readInitialLocale(): Locale {
+  if (typeof window === 'undefined') return DEFAULT_LOCALE;
+  return getInitialLocale();
+}
+
 interface UiState {
   listType: ListTypeFilter;
   listStatus: ListStatusFilter;
@@ -38,6 +50,9 @@ interface UiState {
 
   theme: Theme;
   toggleTheme: () => void;
+
+  locale: Locale;
+  setLocale: (locale: Locale) => void;
 }
 
 export const useUiStore = create<UiState>((set) => ({
@@ -64,8 +79,16 @@ export const useUiStore = create<UiState>((set) => ({
       localStorage.setItem(THEME_STORAGE_KEY, theme);
       return { theme };
     }),
+
+  locale: readInitialLocale(),
+  setLocale: (locale) => {
+    void applyLocale(locale);
+    localStorage.setItem(LOCALE_STORAGE_KEY, locale);
+    set({ locale });
+  },
 }));
 
 if (typeof document !== 'undefined') {
   applyTheme(useUiStore.getState().theme);
+  void applyLocale(useUiStore.getState().locale);
 }

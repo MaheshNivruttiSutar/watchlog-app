@@ -1,5 +1,6 @@
 import * as ToggleGroup from '@radix-ui/react-toggle-group';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import ConfirmDeleteDialog from '../components/ConfirmDeleteDialog';
 import RatingInput from '../components/RatingInput';
@@ -18,20 +19,30 @@ import {
   textMuted,
 } from '../styles/ui';
 
-function statusLabel(status: WatchlistStatus, type: ItemType): string {
+type DetailStatusKey =
+  | 'status.wantToWatch'
+  | 'status.wantToRead'
+  | 'status.watching'
+  | 'status.reading'
+  | 'status.done';
+
+function statusLabelKey(
+  status: WatchlistStatus,
+  type: ItemType,
+): DetailStatusKey {
   if (status === 'want') {
-    return type === 'movie' ? 'Want to watch' : 'Want to read';
+    return type === 'movie' ? 'status.wantToWatch' : 'status.wantToRead';
   }
-  if (status === 'watching') return 'Watching';
-  if (status === 'reading') return 'Reading';
-  return 'Done';
+  if (status === 'watching') return 'status.watching';
+  if (status === 'reading') return 'status.reading';
+  return 'status.done';
 }
 
-function formatAddedDate(dateAdded: string): string {
+function formatAddedDate(dateAdded: string, locale: string): string {
   const parsed = new Date(`${dateAdded}T00:00:00`);
   if (Number.isNaN(parsed.getTime())) return dateAdded;
 
-  return parsed.toLocaleDateString(undefined, {
+  return parsed.toLocaleDateString(locale, {
     year: 'numeric',
     month: 'long',
     day: 'numeric',
@@ -51,6 +62,7 @@ const detailFactLabel =
 const detailFactValue = 'm-0 mt-1.5 text-base font-semibold text-foreground';
 
 function DetailPage() {
+  const { t, i18n } = useTranslation();
   const { id: rawId } = useParams<{ id: string }>();
   const id = rawId ? decodeURIComponent(rawId) : undefined;
   const navigate = useNavigate();
@@ -66,7 +78,7 @@ function DetailPage() {
   if (watchlist.isPending) {
     return (
       <div className="p-page">
-        <p className={textMuted}>Loading…</p>
+        <p className={textMuted}>{t('detail.loading')}</p>
       </div>
     );
   }
@@ -74,9 +86,9 @@ function DetailPage() {
   if (!item) {
     return (
       <div className="p-page">
-        <p className={textMuted}>Item not found.</p>
+        <p className={textMuted}>{t('detail.notFound')}</p>
         <Link to="/watchlist" className={textLink}>
-          Back to list
+          {t('detail.backToList')}
         </Link>
       </div>
     );
@@ -84,9 +96,11 @@ function DetailPage() {
 
   const year = item.type === 'movie' ? item.releaseYear : item.publishYear;
   const creator = item.type === 'movie' ? item.director : item.author;
-  const creatorLabel = item.type === 'movie' ? 'Director' : 'Author';
-  const yearLabel = item.type === 'movie' ? 'Release year' : 'Publish year';
-  const statusText = statusLabel(item.status, item.type);
+  const creatorLabel =
+    item.type === 'movie' ? t('detail.director') : t('detail.author');
+  const yearLabel =
+    item.type === 'movie' ? t('detail.releaseYear') : t('detail.publishYear');
+  const statusText = t(statusLabelKey(item.status, item.type));
   const statusStyle = cardStatusVariant(item.status);
 
   const typeTagClass =
@@ -110,7 +124,7 @@ function DetailPage() {
 
       <div className="relative z-1">
         <Link to="/watchlist" className={textLink}>
-          ← Back to list
+          ← {t('detail.backToList')}
         </Link>
 
         <article className="grid grid-cols-[14rem_minmax(0,1fr)] max-[700px]:grid-cols-1 gap-8 max-[700px]:gap-5 items-start mt-6 max-w-3xl">
@@ -124,14 +138,14 @@ function DetailPage() {
               />
             ) : (
               <div className="flex items-center justify-center w-full aspect-2/3 rounded-card border border-border bg-surface-overlay shadow-poster text-muted text-sm">
-                No cover
+                {t('common.noCover')}
               </div>
             )}
           </div>
 
           <div className="min-w-0 pt-1">
             <div className="flex flex-wrap gap-2 mb-3">
-              <span className={typeTagClass}>{item.type}</span>
+              <span className={typeTagClass}>{t(`media.${item.type}`)}</span>
               <span
                 className={`${detailTagLayout} normal-case tracking-normal ${statusStyle.badge}`}
               >
@@ -146,7 +160,12 @@ function DetailPage() {
             {(creator || year != null) && (
               <p className="m-0 mt-2 text-[1.05rem] text-muted">
                 {creator
-                  ? `${item.type === 'movie' ? 'Directed by' : 'Written by'} ${creator}`
+                  ? t(
+                      item.type === 'movie'
+                        ? 'detail.directedBy'
+                        : 'detail.writtenBy',
+                      { creator },
+                    )
                   : null}
                 {creator && year != null ? ' · ' : null}
                 {year != null ? year : null}
@@ -168,11 +187,11 @@ function DetailPage() {
 
             <section
               className="grid grid-cols-2 max-[700px]:grid-cols-1 gap-3 mt-6"
-              aria-label="Item details"
+              aria-label={t('detail.factsLabel')}
             >
               <div className={detailFact}>
                 <p className={detailFactLabel} id={`status-label-${item.id}`}>
-                  Status
+                  {t('detail.status')}
                 </p>
                 <ToggleGroup.Root
                   type="single"
@@ -191,27 +210,27 @@ function DetailPage() {
                   className="mt-1 flex flex-wrap gap-2"
                 >
                   <ToggleGroup.Item value="want" className={chipToggleItem}>
-                    Want
+                    {t('status.want')}
                   </ToggleGroup.Item>
                   {item.type === 'movie' && (
                     <ToggleGroup.Item value="watching" className={chipToggleItem}>
-                      Watching
+                      {t('status.watching')}
                     </ToggleGroup.Item>
                   )}
                   {item.type === 'book' && (
                     <ToggleGroup.Item value="reading" className={chipToggleItem}>
-                      Reading
+                      {t('status.reading')}
                     </ToggleGroup.Item>
                   )}
                   <ToggleGroup.Item value="done" className={chipToggleItem}>
-                    Done
+                    {t('status.done')}
                   </ToggleGroup.Item>
                 </ToggleGroup.Root>
               </div>
 
               <div className={detailFact}>
                 <p className={detailFactLabel} id={`rating-label-${item.id}`}>
-                  Rating
+                  {t('detail.rating')}
                 </p>
                 <div className="mt-1.5 flex flex-wrap items-center gap-2">
                   <RatingInput
@@ -226,7 +245,9 @@ function DetailPage() {
                     aria-labelledby={`rating-label-${item.id}`}
                   />
                   <span className="text-muted text-sm font-medium">
-                    {item.rating !== null ? `${item.rating} / 5` : 'Not rated yet'}
+                    {item.rating !== null
+                      ? t('detail.ratingValue', { rating: item.rating })
+                      : t('detail.notRated')}
                   </span>
                 </div>
                 <label className="mt-3 flex items-center gap-2 text-sm text-muted">
@@ -237,11 +258,11 @@ function DetailPage() {
                       setSimulateRatingFailure(event.target.checked)
                     }
                   />
-                  Simulate server failure
+                  {t('detail.simulateFailure')}
                 </label>
                 {setRating.isError ? (
                   <p className="m-0 mt-2 text-sm text-danger" role="alert">
-                    Rating was reverted. The server rejected the save.
+                    {t('detail.ratingReverted')}
                   </p>
                 ) : null}
               </div>
@@ -261,23 +282,30 @@ function DetailPage() {
               )}
 
               <div className={`${detailFact} col-span-full`}>
-                <p className={detailFactLabel}>Date added</p>
-                <p className={detailFactValue}>{formatAddedDate(item.dateAdded)}</p>
+                <p className={detailFactLabel}>{t('detail.dateAdded')}</p>
+                <p className={detailFactValue}>
+                  {formatAddedDate(
+                    item.dateAdded,
+                    i18n.resolvedLanguage ?? i18n.language,
+                  )}
+                </p>
               </div>
             </section>
 
             <div className="mt-7">
               <ConfirmDeleteDialog
-                title="Remove from watchlist?"
-                description={`“${item.title}” will be removed from your watchlist.`}
-                confirmLabel="Remove"
+                title={t('detail.removeTitle')}
+                description={t('detail.removeDescription', {
+                  title: item.title,
+                })}
+                confirmLabel={t('common.remove')}
                 onConfirm={() => {
                   removeItem.mutate(item.id);
                   navigate('/watchlist');
                 }}
                 trigger={
                   <button type="button" className={btnDanger}>
-                    Remove from watchlist
+                    {t('detail.removeFromWatchlist')}
                   </button>
                 }
               />

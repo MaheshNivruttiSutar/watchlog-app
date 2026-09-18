@@ -1,0 +1,18 @@
+{
+  "query": "dune",
+  "functionBodyRuns": {
+    "SearchBar": 14,
+    "AddEditPage": 4,
+    "SearchResults": 4,
+    "SearchResultCard": 40
+  },
+  "profilerCommits": {
+    "SearchBar": 7,
+    "SearchResults": 2
+  },
+  "longestCommitMs": 3.6,
+  "wastedComponents": [
+    "SearchResults",
+    "SearchResultCard"
+  ]
+}

@@ -1,32 +1,46 @@
-import { useEffect, useState } from 'react';
+import { Profiler, useCallback, useDeferredValue, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import SearchBar from '../components/SearchBar';
+import SearchProfileHud from '../components/SearchProfileHud';
 import SearchResults from '../components/SearchResults';
+import {
+  countRender,
+  isProfileBaseline,
+  onSearchProfilerRender,
+} from '../debug/renderCounts';
 import { usePopular } from '../hooks/usePopular';
-import { searchErrorMessage, useTitleSearch } from '../hooks/useTitleSearch';
+import { getSearchErrorKey, useTitleSearch } from '../hooks/useTitleSearch';
 import { useWatchlistQuery } from '../hooks/useWatchlist';
 import type { ItemType, SearchResult } from '../types/watchlistItem';
 
+const EMPTY_RESULTS: SearchResult[] = [];
+
 function AddEditPage() {
+  countRender('AddEditPage');
+  const { t } = useTranslation();
   const [submittedQuery, setSubmittedQuery] = useState('');
   const [submittedType, setSubmittedType] = useState<ItemType>('movie');
-  const [hasSearched, setHasSearched] = useState(false);
+  const hasSearched = submittedQuery.length > 0;
 
   const search = useTitleSearch(submittedQuery, submittedType, hasSearched);
+  const searchResults = search.data ?? EMPTY_RESULTS;
+  const deferredSearchResults = useDeferredValue(searchResults);
+  const resultsForUi = isProfileBaseline()
+    ? searchResults
+    : deferredSearchResults;
   const popular = usePopular();
   const watchlist = useWatchlistQuery();
   const items = watchlist.data ?? [];
 
-  function handleSearch(query: string, type: ItemType) {
+  const handleSearch = useCallback((query: string, type: ItemType) => {
     if (!query.trim()) {
-      setHasSearched(false);
       setSubmittedQuery('');
       return;
     }
 
     setSubmittedType(type);
     setSubmittedQuery(query.trim());
-    setHasSearched(true);
-  }
+  }, []);
 
   const [popularForVisit, setPopularForVisit] = useState<SearchResult[]>([]);
 
@@ -44,26 +58,26 @@ function AddEditPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [popular.data, popular.isPending]);
 
-  const searchError = search.isError ? searchErrorMessage(search.error) : null;
+  const searchError = search.isError ? t(getSearchErrorKey(search.error)) : null;
   const popularError =
-    popular.isError ? searchErrorMessage(popular.error) : null;
+    popular.isError ? t(getSearchErrorKey(popular.error)) : null;
 
   return (
     <div className="p-page">
       <header className="mb-8 max-w-3xl">
         <h1 className="m-0 text-3xl font-bold text-foreground">
-          Discover your next obsession.
+          {t('search.title')}
         </h1>
-        <p className="mt-1 text-muted">
-          Search across movies and books, then add titles to your watchlist.
-        </p>
+        <p className="mt-1 text-muted">{t('search.subtitle')}</p>
       </header>
 
-      <SearchBar
-        onSearch={handleSearch}
-        loading={search.isFetching}
-        error={searchError}
-      />
+      <Profiler id="SearchBar" onRender={onSearchProfilerRender}>
+        <SearchBar
+          onSearch={handleSearch}
+          loading={search.isFetching}
+          error={searchError}
+        />
+      </Profiler>
 
       {!hasSearched && popularError && (
         <p className="mb-4 text-sm text-warning" role="status">
@@ -71,21 +85,25 @@ function AddEditPage() {
         </p>
       )}
 
-      {hasSearched ? (
-        <SearchResults
-          results={search.data ?? []}
-          heading="Search results"
-          emptyMessage="No results found. Try a different search."
-          loading={search.isFetching}
-        />
-      ) : (
-        <SearchResults
-          results={popularForVisit}
-          heading="Popular right now"
-          emptyMessage="No popular titles available right now. Search for something new."
-          loading={popular.isPending}
-        />
-      )}
+      <Profiler id="SearchResults" onRender={onSearchProfilerRender}>
+        {hasSearched ? (
+          <SearchResults
+            results={resultsForUi}
+            heading={t('search.results')}
+            emptyMessage={t('search.noResults')}
+            loading={search.isFetching || resultsForUi !== searchResults}
+          />
+        ) : (
+          <SearchResults
+            results={popularForVisit}
+            heading={t('search.popular')}
+            emptyMessage={t('search.noPopular')}
+            loading={popular.isPending}
+          />
+        )}
+      </Profiler>
+
+      <SearchProfileHud />
     </div>
   );
 }

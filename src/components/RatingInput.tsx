@@ -1,4 +1,5 @@
 import * as ToggleGroup from '@radix-ui/react-toggle-group';
+import { useTranslation } from 'react-i18next';
 
 interface RatingInputProps {
   value: number | null;
@@ -12,6 +13,7 @@ function RatingInput({
   onChange,
   'aria-labelledby': ariaLabelledBy,
 }: RatingInputProps) {
+  const { t } = useTranslation();
   const filledThrough = value ?? 0;
 
   return (
@@ -21,7 +23,7 @@ function RatingInput({
       onValueChange={(next) => {
         onChange(next === '' ? null : Number(next));
       }}
-      aria-label={ariaLabelledBy ? undefined : 'Rating from 1 to 5 stars'}
+      aria-label={ariaLabelledBy ? undefined : t('rating.groupLabel')}
       aria-labelledby={ariaLabelledBy}
       className="inline-flex items-center gap-0.5"
     >
@@ -31,7 +33,11 @@ function RatingInput({
           <ToggleGroup.Item
             key={star}
             value={String(star)}
-            aria-label={`${star} star${star === 1 ? '' : 's'}`}
+            aria-label={
+              star === 1
+                ? t('rating.oneStar')
+                : t('rating.multipleStars', { count: star })
+            }
             className={[
               'inline-flex items-center justify-center w-8 h-8 border-0 rounded-button bg-transparent text-[1.25rem] leading-none cursor-pointer transition-colors',
               'focus-visible:outline-none focus-visible:shadow-focus',

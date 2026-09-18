@@ -1,5 +1,9 @@
 import { useQuery } from '@tanstack/react-query';
-import { isTransientSearchError, search } from '../api/search';
+import {
+  isTransientSearchError,
+  search,
+  SearchApiError,
+} from '../api/search';
 import { queryKeys } from '../query/keys';
 import type { ItemType } from '../types/watchlistItem';
 
@@ -19,8 +23,25 @@ export function useTitleSearch(query: string, type: ItemType, enabled: boolean) 
   });
 }
 
-export function searchErrorMessage(error: unknown): string {
-  return error instanceof Error
-    ? error.message
-    : 'Something went wrong. Please try again.';
+export type SearchErrorKey =
+  | 'errors.network'
+  | 'errors.tmdbNotConfigured'
+  | 'errors.searchFailed';
+
+/** Convert technical API failures into safe, translatable UI message keys. */
+export function getSearchErrorKey(error: unknown): SearchErrorKey {
+  if (!(error instanceof SearchApiError)) return 'errors.searchFailed';
+
+  if (
+    error.statusCode === undefined &&
+    error.message.startsWith('Network error')
+  ) {
+    return 'errors.network';
+  }
+
+  if (error.source === 'tmdb' && error.statusCode === undefined) {
+    return 'errors.tmdbNotConfigured';
+  }
+
+  return 'errors.searchFailed';
 }

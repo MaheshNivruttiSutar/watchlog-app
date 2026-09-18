@@ -1,10 +1,14 @@
+import { memo, useCallback, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   useAddWatchlistItem,
   useRemoveWatchlistItem,
   useWatchlistQuery,
 } from '../hooks/useWatchlist';
 import type { SearchResult, WatchlistItem } from '../types/watchlistItem';
-import { badgeClass, btnDanger, btnPrimary, textMuted } from '../styles/ui';
+import { countRender, isProfileBaseline } from '../debug/renderCounts';
+import { textMuted } from '../styles/ui';
+import SearchResultCard from './SearchResultCard';
 
 interface SearchResultsProps {
   results: SearchResult[];
@@ -34,24 +38,44 @@ function makeWatchlistItem(result: SearchResult): WatchlistItem {
 const sectionLabel =
   'm-0 mb-4 text-sm font-semibold uppercase tracking-wider text-muted';
 
-const searchCardAction = 'mt-auto w-full shrink-0 whitespace-nowrap';
+const EMPTY_WATCHLIST: WatchlistItem[] = [];
 
 function SearchResults({
   results,
   heading,
-  emptyMessage = 'No results found. Try a different search.',
+  emptyMessage,
   loading = false,
 }: SearchResultsProps) {
+  countRender('SearchResults');
+  const { t } = useTranslation();
   const watchlist = useWatchlistQuery();
-  const addItem = useAddWatchlistItem();
-  const removeItem = useRemoveWatchlistItem();
-  const items = watchlist.data ?? [];
+  const { mutate: addItem } = useAddWatchlistItem();
+  const { mutate: removeItem } = useRemoveWatchlistItem();
+  const items = watchlist.data ?? EMPTY_WATCHLIST;
+  const savedIds = useMemo(
+    () => new Set(items.map((item) => item.id)),
+    [items],
+  );
+
+  const handleAdd = useCallback(
+    (result: SearchResult) => {
+      addItem(makeWatchlistItem(result));
+    },
+    [addItem],
+  );
+
+  const handleRemove = useCallback(
+    (id: string) => {
+      removeItem(id);
+    },
+    [removeItem],
+  );
 
   if (loading && results.length === 0) {
     return (
       <section>
         <h2 className={sectionLabel}>{heading}</h2>
-        <p className={textMuted}>Loading…</p>
+        <p className={textMuted}>{t('common.loading')}</p>
       </section>
     );
   }
@@ -59,7 +83,7 @@ function SearchResults({
   if (results.length === 0) {
     return (
       <section className="p-12 px-6 border border-dashed border-border rounded-card bg-surface-raised text-center">
-        <p className={textMuted}>{emptyMessage}</p>
+        <p className={textMuted}>{emptyMessage ?? t('search.noResults')}</p>
       </section>
     );
   }
@@ -71,59 +95,14 @@ function SearchResults({
       <ul className="grid grid-cols-[repeat(auto-fill,minmax(11rem,1fr))] gap-card-gap">
         {results.map((result) => {
           const id = result.type + '-' + result.externalId;
-          const alreadyAdded = items.some((item) => item.id === id);
-          const subtitle =
-            result.author ||
-            (result.releaseYear ? String(result.releaseYear) : result.type);
-
-          function handleClick() {
-            if (alreadyAdded) {
-              removeItem.mutate(id);
-            } else {
-              addItem.mutate(makeWatchlistItem(result));
-            }
-          }
-
           return (
-            <li
+            <SearchResultCard
               key={id}
-              className="flex flex-col overflow-hidden border border-border rounded-card bg-surface-raised shadow-card"
-            >
-              <div className="relative aspect-2/3 bg-surface-overlay">
-                {result.coverUrl ? (
-                  <img
-                    src={result.coverUrl}
-                    alt=""
-                    referrerPolicy="no-referrer"
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <div className="flex items-center justify-center h-full text-sm text-muted">
-                    No cover
-                  </div>
-                )}
-                <span className={badgeClass('right', result.type)}>{result.type}</span>
-              </div>
-
-              <div className="flex flex-1 flex-col p-3 gap-1">
-                <p className="m-0 font-semibold text-foreground truncate">
-                  {result.title}
-                </p>
-                <p className="m-0 text-sm text-muted truncate">{subtitle}</p>
-
-                <button
-                  type="button"
-                  onClick={handleClick}
-                  className={
-                    alreadyAdded
-                      ? `${btnDanger} ${searchCardAction}`
-                      : `${btnPrimary} ${searchCardAction}`
-                  }
-                >
-                  {alreadyAdded ? 'Remove' : 'Add to Watchlist'}
-                </button>
-              </div>
-            </li>
+              result={result}
+              alreadyAdded={savedIds.has(id)}
+              onAdd={handleAdd}
+              onRemove={handleRemove}
+            />
           );
         })}
       </ul>
@@ -131,4 +110,11 @@ function SearchResults({
   );
 }
 
-export default SearchResults;
+const MemoSearchResults = memo(SearchResults);
+
+export default function SearchResultsExport(props: SearchResultsProps) {
+  if (isProfileBaseline()) {
+    return <SearchResults {...props} />;
+  }
+  return <MemoSearchResults {...props} />;
+}

@@ -1,4 +1,5 @@
 import * as Switch from '@radix-ui/react-switch';
+import { useTranslation } from 'react-i18next';
 import { useUiStore } from '../store/uiStore';
 
 /**
@@ -6,6 +7,7 @@ import { useUiStore } from '../store/uiStore';
  * Keyboard: Space/Enter toggles; focus ring is visible.
  */
 function ThemeToggle() {
+  const { t } = useTranslation();
   const theme = useUiStore((state) => state.theme);
   const toggleTheme = useUiStore((state) => state.toggleTheme);
   const isDark = theme === 'dark';
@@ -14,7 +16,7 @@ function ThemeToggle() {
     <Switch.Root
       checked={isDark}
       onCheckedChange={() => toggleTheme()}
-      aria-label={isDark ? 'Switch to light theme' : 'Switch to dark theme'}
+      aria-label={isDark ? t('theme.switchToLight') : t('theme.switchToDark')}
       className="relative inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-chip border border-border bg-surface-overlay transition-colors data-[state=checked]:bg-accent data-[state=checked]:border-accent focus-visible:outline-none focus-visible:shadow-focus"
     >
       <Switch.Thumb className="block h-5 w-5 translate-x-0.5 rounded-chip bg-surface-raised shadow-card transition-transform data-[state=checked]:translate-x-[1.35rem]" />

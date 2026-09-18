@@ -1,4 +1,5 @@
 import * as ToggleGroup from '@radix-ui/react-toggle-group';
+import { useTranslation } from 'react-i18next';
 import WatchlistGrid from '../components/WatchlistGrid';
 import { useWatchlistQuery } from '../hooks/useWatchlist';
 import { useUiStore } from '../store/uiStore';
@@ -6,6 +7,7 @@ import { chipToggleItem } from '../styles/ui';
 import { getFilteredWatchlistItems } from '../utils/watchlistView';
 
 function ListPage() {
+  const { t } = useTranslation();
   const listType = useUiStore((state) => state.listType);
   const listStatus = useUiStore((state) => state.listStatus);
   const setListType = useUiStore((state) => state.setListType);
@@ -24,10 +26,10 @@ function ListPage() {
     <div className="p-page">
       <div className="flex flex-wrap items-start justify-between gap-6 mb-8">
         <div>
-          <h1 className="m-0 text-3xl font-bold text-foreground">Your Watchlist</h1>
-          <p className="mt-1 text-muted">
-            Track what you want, what you&apos;re into, and what you&apos;ve finished.
-          </p>
+          <h1 className="m-0 text-3xl font-bold text-foreground">
+            {t('list.title')}
+          </h1>
+          <p className="mt-1 text-muted">{t('list.subtitle')}</p>
         </div>
       </div>
 
@@ -38,17 +40,17 @@ function ListPage() {
           if (next !== 'all' && next !== 'movie' && next !== 'book') return;
           setListType(next);
         }}
-        aria-label="Filter by type"
+        aria-label={t('list.filterByType')}
         className="flex flex-wrap gap-2 mb-4"
       >
         <ToggleGroup.Item value="all" className={chipToggleItem}>
-          All
+          {t('status.all')}
         </ToggleGroup.Item>
         <ToggleGroup.Item value="movie" className={chipToggleItem}>
-          Movies
+          {t('media.movies')}
         </ToggleGroup.Item>
         <ToggleGroup.Item value="book" className={chipToggleItem}>
-          Books
+          {t('media.books')}
         </ToggleGroup.Item>
       </ToggleGroup.Root>
 
@@ -66,35 +68,44 @@ function ListPage() {
             setListStatus(next);
           }
         }}
-        aria-label="Filter by status"
+        aria-label={t('list.filterByStatus')}
         className="flex flex-wrap gap-2 mb-8"
       >
         <ToggleGroup.Item value="all" className={chipToggleItem}>
-          All
+          {t('status.all')}
         </ToggleGroup.Item>
         <ToggleGroup.Item value="want" className={chipToggleItem}>
-          Want
+          {t('status.want')}
         </ToggleGroup.Item>
         <ToggleGroup.Item
           value="watching"
           disabled={watchingDisabled}
           className={chipToggleItem}
         >
-          Watching
+          {t('status.watching')}
         </ToggleGroup.Item>
         <ToggleGroup.Item
           value="reading"
           disabled={readingDisabled}
           className={chipToggleItem}
         >
-          Reading
+          {t('status.reading')}
         </ToggleGroup.Item>
         <ToggleGroup.Item value="done" className={chipToggleItem}>
-          Done
+          {t('status.done')}
         </ToggleGroup.Item>
       </ToggleGroup.Root>
 
-      <WatchlistGrid items={filteredItems} />
+      <WatchlistGrid items={filteredItems}>
+        {(item) => (
+          <WatchlistGrid.Card key={item.id} item={item}>
+            <WatchlistGrid.Cover>
+              <WatchlistGrid.Remove />
+            </WatchlistGrid.Cover>
+            <WatchlistGrid.Meta />
+          </WatchlistGrid.Card>
+        )}
+      </WatchlistGrid>
     </div>
   );
 }

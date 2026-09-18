@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { SearchApiError } from '../api/search.js';
-import { searchErrorMessage } from '../hooks/useTitleSearch.js';
+import { getSearchErrorKey } from '../hooks/useTitleSearch.js';
 import { queryKeys } from '../query/keys.js';
 
 describe('queryKeys', () => {
@@ -12,10 +12,20 @@ describe('queryKeys', () => {
   });
 });
 
-describe('searchErrorMessage', () => {
-  it('uses the Error message when present', () => {
+describe('getSearchErrorKey', () => {
+  it('maps technical failures to translatable message keys', () => {
     expect(
-      searchErrorMessage(new SearchApiError('Network error', 'tmdb')),
-    ).toBe('Network error');
+      getSearchErrorKey(
+        new SearchApiError('Network error while searching movies', 'tmdb'),
+      ),
+    ).toBe('errors.network');
+    expect(
+      getSearchErrorKey(
+        new SearchApiError('TMDB API key is not configured', 'tmdb'),
+      ),
+    ).toBe('errors.tmdbNotConfigured');
+    expect(getSearchErrorKey(new Error('Unexpected failure'))).toBe(
+      'errors.searchFailed',
+    );
   });
 });
