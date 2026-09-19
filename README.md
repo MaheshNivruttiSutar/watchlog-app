@@ -26,7 +26,12 @@ cp .env.example .env   # optional — needed for movie search
 | Command | What it does |
 |---------|--------------|
 | `npm run dev` | Start the React app (Vite) |
+| `npm run dev:remote` | Start WatchLog as a Module Federation remote on port 3001 |
+| `npm run dev:host` | Start the host shell on port 3000 (requires the remote) |
 | `npm run build` | Build the React app for production (`dist/`) |
+| `npm run build:remote` | Build the Module Federation remote (`dist-remote/`) |
+| `npm run build:host` | Build the host shell (`host-shell/dist/`) |
+| `npm run analyze:mf` | Analyzer reports for host + remote, then singleton check |
 | `npm run build:lib` | Compile the data layer for Node (`lib/`) |
 | `npm run preview` | Preview the production app build |
 | `npm run type-check` | Typecheck with TypeScript (`tsc --noEmit`) |
@@ -76,6 +81,34 @@ npm run dev
 ```
 
 Open the URL shown in the terminal (usually `http://localhost:5173`).
+
+## Run as a Module Federation remote
+
+```bash
+npm run dev:remote
+```
+
+Open `http://localhost:3001` to run WatchLog by itself. The federation
+container is available at `http://localhost:3001/remoteEntry.js` and exposes
+`./WatchLogApp` from the remote named `watchlog`.
+
+To load that remote from the independent host shell:
+
+```bash
+cd host-shell
+npm install
+npm run dev
+```
+
+Or from the repo root: `npm run dev:host` (after `npm install` in `host-shell`).
+Open `http://localhost:3000`. Keep the remote running on port 3001.
+
+Both Webpack configs share React, React DOM, and `react-router-dom` as
+singletons (`webpack/sharedSingletons.cjs`) so the host and remote do not
+mount two copies of React.
+
+Bundle analysis (item 5): `npm run analyze:mf`. Findings:
+[docs/STAGE-8-BUNDLE-ANALYSIS.md](docs/STAGE-8-BUNDLE-ANALYSIS.md).
 
 ### Routes
 

@@ -1,5 +1,8 @@
 node_modules/
 dist/
+dist-remote/
 lib/
 .env
 *.log
+docs/mf-host-stats.json
+docs/mf-remote-stats.json

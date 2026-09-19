@@ -1,0 +1,29 @@
+{
+  "ok": true,
+  "findings": [
+    {
+      "packageName": "react",
+      "hostCopies": 1,
+      "remoteCopies": 1,
+      "hostConsumeShared": 1,
+      "remoteConsumeShared": 1,
+      "ok": true
+    },
+    {
+      "packageName": "react-dom",
+      "hostCopies": 1,
+      "remoteCopies": 1,
+      "hostConsumeShared": 1,
+      "remoteConsumeShared": 1,
+      "ok": true
+    },
+    {
+      "packageName": "react-router-dom",
+      "hostCopies": 1,
+      "remoteCopies": 1,
+      "hostConsumeShared": 1,
+      "remoteConsumeShared": 1,
+      "ok": true
+    }
+  ]
+}

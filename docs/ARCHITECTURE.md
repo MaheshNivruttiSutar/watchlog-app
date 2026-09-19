@@ -11,14 +11,15 @@ WatchLog is a personal movie and book watchlist:
 3. View stats on a dashboard
 4. Practice protected routes with fake login (demo users in `localStorage`)
 
-**Two builds from the same `src/`:**
+**Three builds from this repo:**
 
 | Command | Output | Purpose |
 |---------|--------|---------|
-| `npm run build` | `dist/` | Production React app |
+| `npm run build` | `dist/` | Production React app (Vite) |
 | `npm run build:lib` | `lib/` | Compiled data layer for Node (tests, live scripts) |
+| `npm run build:remote` / `npm run build:host` | `dist-remote/` + `host-shell/dist/` | Module Federation remote + host shell |
 
-Edit source under `src/` only. Do not hand-edit `dist/` or `lib/`.
+Edit source under `src/` (and `host-shell/src/`) only. Do not hand-edit `dist/`, `dist-remote/`, `host-shell/dist/`, or `lib/`.
 
 ---
 
@@ -29,6 +30,9 @@ watchLogProject/
 ├── index.html              # HTML shell — Vite mounts React into #root
 ├── package.json            # Scripts and dependencies
 ├── vite.config.ts          # React app build / dev server
+├── webpack/                # WatchLog Module Federation remote
+├── host-shell/             # Separate Webpack host that loads the remote
+├── STAGE-8.md              # Host + remote runbook and submission notes
 ├── vitest.config.ts        # Unit test runner
 ├── tsconfig.json           # TypeScript for the app
 ├── tsconfig.lib.json       # TypeScript for the Node library build
@@ -36,9 +40,11 @@ watchLogProject/
 ├── scripts/
 │   └── test-search.mjs     # Live API smoke test (real network)
 ├── dist/                   # Generated — production React build
+├── dist-remote/            # Generated — Webpack remote
 ├── lib/                    # Generated — compiled data layer for Node
 ├── docs/
-│   └── ARCHITECTURE.md     # This file
+│   ├── ARCHITECTURE.md     # This file
+│   └── STAGE-8-BUNDLE-ANALYSIS.md
 └── src/                    # All application source
     ├── main.tsx            # App bootstrap (seed users, mount React)
     ├── App.tsx             # Providers + routes
