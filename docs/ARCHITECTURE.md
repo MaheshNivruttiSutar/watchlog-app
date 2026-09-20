@@ -1,6 +1,6 @@
 # WatchLog — Architecture & Folder Structure
 
-This document explains how the project is organized: two products in one repo (React app + TypeScript data library), and what each folder is for.
+This document explains how the project is organized: a Vite React app, a TypeScript data library, a Webpack Module Federation remote + host, and an automated test suite.
 
 ## Overview
 
@@ -10,16 +10,20 @@ WatchLog is a personal movie and book watchlist:
 2. Add items with status (`want` / `watching` / `reading` / `done`) and rating
 3. View stats on a dashboard
 4. Practice protected routes with fake login (demo users in `localStorage`)
+5. Switch UI language (EN / HI) and light / dark theme
+6. Load the same UI from a separate host via Module Federation (Stage 8)
+7. Fail fast on contract breaks via Vitest + RTL + MSW (Stage 9)
 
-**Three builds from this repo:**
+**Builds from this repo:**
 
 | Command | Output | Purpose |
 |---------|--------|---------|
 | `npm run build` | `dist/` | Production React app (Vite) |
-| `npm run build:lib` | `lib/` | Compiled data layer for Node (tests, live scripts) |
+| `npm run build:lib` | `lib/` | Compiled data layer for Node (live scripts) |
 | `npm run build:remote` / `npm run build:host` | `dist-remote/` + `host-shell/dist/` | Module Federation remote + host shell |
+| `npm run test:coverage` | `coverage/` | HTML + text coverage (git-ignored) |
 
-Edit source under `src/` (and `host-shell/src/`) only. Do not hand-edit `dist/`, `dist-remote/`, `host-shell/dist/`, or `lib/`.
+Edit source under `src/` (and `host-shell/src/`) only. Do not hand-edit `dist/`, `dist-remote/`, `host-shell/dist/`, `lib/`, or `coverage/`.
 
 ---
 
@@ -30,96 +34,51 @@ watchLogProject/
 ├── index.html              # HTML shell — Vite mounts React into #root
 ├── package.json            # Scripts and dependencies
 ├── vite.config.ts          # React app build / dev server
+├── vitest.config.ts        # jsdom, MSW setup, 80% coverage gates
 ├── webpack/                # WatchLog Module Federation remote
-├── host-shell/             # Separate Webpack host that loads the remote
-├── STAGE-8.md              # Host + remote runbook and submission notes
-├── vitest.config.ts        # Unit test runner
+│   ├── remote.config.cjs
+│   ├── sharedSingletons.cjs  # react / react-dom / react-router-dom
+│   └── analyzer.cjs
+├── host-shell/             # Independent Webpack host (port 3000)
+├── STAGE-1.md … STAGE-9.md # Per-stage write-ups
 ├── tsconfig.json           # TypeScript for the app
 ├── tsconfig.lib.json       # TypeScript for the Node library build
 ├── .env / .env.example     # TMDB keys (`.env` is git-ignored)
 ├── scripts/
-│   └── test-search.mjs     # Live API smoke test (real network)
-├── dist/                   # Generated — production React build
+│   ├── test-search.mjs     # Live API smoke test (real network)
+│   └── check-mf-singletons.mjs
+├── dist/                   # Generated — production Vite build
 ├── dist-remote/            # Generated — Webpack remote
 ├── lib/                    # Generated — compiled data layer for Node
+├── coverage/               # Generated — Vitest coverage (git-ignored)
 ├── docs/
 │   ├── ARCHITECTURE.md     # This file
+│   ├── STAGE-7-PROFILING.md
 │   └── STAGE-8-BUNDLE-ANALYSIS.md
 └── src/                    # All application source
     ├── main.tsx            # App bootstrap (seed users, mount React)
     ├── App.tsx             # Providers + routes
     ├── index.ts            # Public exports for the data library
     ├── config.ts           # Central env / API URL config
-    ├── vite-env.d.ts       # Vite env typings
     ├── types/
     │   └── watchlistItem.ts
-    ├── api/
-    │   ├── search.ts       # Book + movie search
-    │   ├── popular.ts      # Popular lists
-    │   └── mappers.ts      # External API JSON → SearchResult
-    ├── utils/
-    │   ├── filter.ts
-    │   ├── sort.ts
-    │   ├── group.ts
-    │   ├── statistics.ts
-    │   ├── watchlistView.ts  # stats, recent, filtered list (pure)
-    │   └── theme.ts
-    ├── i18n/
-    │   ├── en.ts             # English catalog (source of truth for keys)
-    │   ├── hi.ts             # Hindi catalog
-    │   ├── locale.ts         # Locale type + localStorage helpers
-    │   └── index.ts          # i18next init
-    ├── hooks/
-    │   ├── usePopular.ts
-    │   ├── useDebouncedValue.ts
-    │   ├── useTitleSearch.ts
-    │   └── useWatchlist.ts
-    ├── query/
-    │   ├── queryClient.ts    # shared Query cache
-    │   ├── keys.ts           # query keys (cache slots)
-    │   └── watchlistApi.ts   # localStorage as a fake server
-    ├── store/
-    │   └── uiStore.ts        # Zustand: filters, search box, theme
-    ├── context/
-    │   └── AuthContext.tsx
-    ├── data/
-    │   └── localStorage.tsx  # Demo users + localStorage helpers
-    ├── debug/
-    │   └── renderCounts.ts   # Dev-only search profile counters
-    ├── components/
-    │   ├── Sidebar.tsx
-    │   ├── LanguageToggle.tsx
-    │   ├── ProtectedRoute.tsx
-    │   ├── SearchBar.tsx
-    │   ├── SearchResults.tsx
-    │   ├── SearchResultCard.tsx
-    │   ├── SearchProfileHud.tsx  # Dev HUD when watchlog-profile=1
-    │   ├── WatchlistCard.tsx   # Card / Cover / Meta / Remove (compound parts)
-    │   ├── WatchlistGrid.tsx   # Grid root + empty state; attaches Card parts
-    │   ├── RatingInput.tsx
-    │   ├── ConfirmDeleteDialog.tsx
-    │   └── ThemeToggle.tsx
-    ├── pages/
-    │   ├── DashboardPage.tsx
-    │   ├── ListPage.tsx
-    │   ├── DetailPage.tsx
-    │   ├── AddEditPage.tsx
-    │   ├── LoginPage.tsx
-    │   └── NotFoundPage.tsx
+    ├── api/                # search, popular, mappers
+    ├── utils/              # filter, sort, group, statistics, theme, storage, view
+    ├── i18n/               # en / hi catalogs + i18next
+    ├── hooks/              # search, popular, watchlist, debounce
+    ├── query/              # QueryClient, keys, fake watchlist API
+    ├── store/              # Zustand uiStore
+    ├── context/            # AuthContext
+    ├── data/               # Demo users
+    ├── debug/              # Dev-only search profile counters
+    ├── remote/             # MF expose: WatchLogApp + standalone entry
+    ├── components/         # Sidebar, search, watchlist grid, rating, …
+    ├── pages/              # One screen per route
     ├── styles/
-    │   ├── App.css
-    │   └── ui.ts
-    └── __tests__/
-        ├── mockData.ts
-        ├── filter.test.ts
-        ├── sort.test.ts
-        ├── group.test.ts
-        ├── statistics.test.ts
-        ├── search.test.ts
-        └── popular.test.ts
+    └── __tests__/          # Vitest + RTL + MSW (see Testing below)
 ```
 
-Ignore `node_modules/` (installed packages). Treat `dist/` and `lib/` as build outputs, not source of truth.
+Ignore `node_modules/` (installed packages). Treat `dist/`, `dist-remote/`, `host-shell/dist/`, `lib/`, and `coverage/` as generated output, not source of truth.
 
 ---
 
@@ -152,17 +111,18 @@ index.html
 | Types | `src/types/` | Data shapes (`WatchlistItem`, `SearchResult`, stats) |
 | Config | `src/config.ts` | API base URLs + `getTmdbApiKey()` — all env reads here |
 | API | `src/api/` | Fetch Open Library / TMDB; mappers clean external JSON |
-| Utils | `src/utils/` | Pure helpers: filter, sort, group, statistics (easy to test) |
-| Hooks | `src/hooks/` | TanStack Query hooks: search, popular, watchlist |
+| Utils | `src/utils/` | Pure helpers: filter, sort, group, statistics, theme, watchlist storage/view |
+| Hooks | `src/hooks/` | TanStack Query hooks: search, popular, watchlist; debounce |
 | i18n | `src/i18n/` | English/Hindi catalogs + i18next; UI reads strings via `t()` |
-| Query | `src/query/` | QueryClient, keys, fake watchlist API |
-| Store | `src/store/` | Zustand `uiStore`: filters, search box, theme |
+| Query | `src/query/` | QueryClient, keys, fake watchlist API (`localStorage`) |
+| Store | `src/store/` | Zustand `uiStore`: filters, search box, theme, locale |
 | Context | `src/context/` | Shared UI state: auth |
 | Data | `src/data/` | Demo users in `localStorage` |
+| Remote | `src/remote/` | Module Federation `WatchLogApp` and standalone mount |
 | Components | `src/components/` | Reusable UI widgets |
 | Pages | `src/pages/` | One screen per route |
 | Styles | `src/styles/` | Global CSS + shared UI class helpers |
-| Tests | `src/__tests__/` | Unit tests (mocked APIs) + shared mock watchlist |
+| Tests | `src/__tests__/` | Unit, hook, RTL page, and journey tests |
 
 **Rule of thumb:** pages read watchlist/search from TanStack Query; filters/theme from Zustand; UI never talks to raw TMDB/Open Library field names (mappers handle that).
 
@@ -217,6 +177,35 @@ useAddWatchlistItem → watchlistApi → localStorage
         ↓
 ListPage / Dashboard / Detail read queryKeys.watchlist
 ```
+
+---
+
+## Module Federation (Stage 8)
+
+Vite still owns `npm run dev` / `npm run build`. Webpack owns the remote:
+
+- Remote (`npm run dev:remote`, port 3001) exposes `watchlog/./WatchLogApp`
+- Host (`host-shell/`, port 3000) loads `remoteEntry.js` at runtime
+- Shared singletons: `webpack/sharedSingletons.cjs` (React, React DOM, react-router-dom)
+
+Write-up: [STAGE-8.md](../STAGE-8.md). Bundle proof: [STAGE-8-BUNDLE-ANALYSIS.md](STAGE-8-BUNDLE-ANALYSIS.md).
+
+---
+
+## Testing (Stage 9)
+
+Vitest runs the suite (`npm test`). React Testing Library queries the UI. MSW intercepts Open Library / TMDB `fetch`. Watchlist mutations are **not** HTTP — they use `watchlistApi` + `localStorage`. Tests that need an empty list must `saveWatchlist([])` or they get the seed `mockWatchlist`.
+
+Each React test gets a fresh `QueryClient` with retries off (`renderWithProviders.tsx`). Production `queryClient` has 30s `staleTime` and must not be shared across tests except the journey, which clears it in `beforeEach`.
+
+| Layer | Examples |
+|-------|----------|
+| Unit | `filter`, `sort`, `group`, `statistics`, `theme`, `watchlistStorage` |
+| Hook | `useTitleSearch` loading / success / error via MSW |
+| Page | `listPage` render, filter, empty; dashboard; detail rollback |
+| Journey | `userJourney`: login → search Dune → add → Done → rate 4 |
+
+Coverage: `npm run test:coverage` (V8, 80% statements/branches/functions/lines). Write-up: [STAGE-9.md](../STAGE-9.md).
 
 ---
 
