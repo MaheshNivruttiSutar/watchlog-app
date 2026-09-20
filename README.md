@@ -159,18 +159,12 @@ Script location: `scripts/test-search.mjs`
 
 ## Automated testing
 
-The offline suite uses Vitest's Jest-compatible API, React Testing Library,
-and MSW. It covers utility functions, search-hook loading/success/error states,
-watchlist rendering and filters, and the complete login → search → add → status
-→ rating journey.
+Stage 9 write-up: **[STAGE-9.md](STAGE-9.md)**.
 
 ```bash
 npm test
 npm run test:coverage
 ```
-
-The coverage command writes an HTML report to `coverage/` and fails when
-statements, branches, functions, or lines fall below 80%.
 
 ## Project structure
 
