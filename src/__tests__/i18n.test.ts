@@ -30,6 +30,6 @@ describe('i18n catalogs', () => {
     expect(i18n.t('nav.dashboard')).toBe('डैशबोर्ड');
     expect(
       i18n.t('dashboard.itemBreakdown', { movies: 2, books: 3 }),
-    ).toBe('2 फ़िल्में · 3 किताबें');
+    ).toBe('2 फिल्में · 3 किताबें');
   });
 });

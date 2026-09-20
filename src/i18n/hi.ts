@@ -30,7 +30,7 @@ export const hi: Translations = {
     title: 'सिस्टम अवलोकन',
     subtitle: 'आपकी WatchLog गतिविधि का सारांश।',
     totalItems: 'कुल आइटम',
-    itemBreakdown: '{{movies}} फ़िल्में · {{books}} किताबें',
+    itemBreakdown: '{{movies}} फिल्में · {{books}} किताबें',
     completed: 'पूरा किया',
     percentComplete: '{{rate}} प्रतिशत पूरा',
     percentDone: '{{rate}}% पूरा',
@@ -51,9 +51,9 @@ export const hi: Translations = {
     noCover: 'कवर उपलब्ध नहीं',
   },
   media: {
-    movie: 'फ़िल्म',
+    movie: 'फिल्म',
     book: 'किताब',
-    movies: 'फ़िल्में',
+    movies: 'फिल्में',
     books: 'किताबें',
   },
   status: {
@@ -69,13 +69,13 @@ export const hi: Translations = {
     title: 'आपकी वॉचलिस्ट',
     subtitle:
       'जो आप देखना या पढ़ना चाहते हैं, अभी कर रहे हैं और पूरा कर चुके हैं, उसे ट्रैक करें।',
-    filterByType: 'प्रकार के अनुसार फ़िल्टर करें',
-    filterByStatus: 'स्थिति के अनुसार फ़िल्टर करें',
-    empty: 'इन फ़िल्टर से कोई आइटम मेल नहीं खाता।',
+    filterByType: 'प्रकार के अनुसार फिल्टर करें',
+    filterByStatus: 'स्थिति के अनुसार फिल्टर करें',
+    empty: 'इन फिल्टर से कोई आइटम मेल नहीं खाता।',
   },
   search: {
     title: 'अपनी अगली पसंद खोजें।',
-    subtitle: 'फ़िल्में और किताबें खोजें, फिर उन्हें अपनी वॉचलिस्ट में जोड़ें।',
+    subtitle: 'फिल्में और किताबें खोजें, फिर उन्हें अपनी वॉचलिस्ट में जोड़ें।',
     placeholder: 'शीर्षक, लेखक, निर्देशक...',
     inputLabel: 'शीर्षक, लेखक या निर्देशक खोजें',
     clear: 'खोज साफ़ करें',
@@ -139,7 +139,7 @@ export const hi: Translations = {
   },
   errors: {
     network: 'नेटवर्क त्रुटि हुई। अपना कनेक्शन जाँचें और फिर कोशिश करें।',
-    tmdbNotConfigured: 'फ़िल्म खोज कॉन्फ़िगर नहीं की गई है।',
+    tmdbNotConfigured: 'खोज कॉन्फिगर नहीं की गई है।',
     searchFailed: 'कुछ गलत हो गया। कृपया फिर कोशिश करें।',
   },
 };

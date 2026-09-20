@@ -37,6 +37,7 @@ cp .env.example .env   # optional — needed for movie search
 | `npm run type-check` | Typecheck with TypeScript (`tsc --noEmit`) |
 | `npm test` | Unit tests (mocked APIs, offline) |
 | `npm run test:watch` | Vitest in watch mode |
+| `npm run test:coverage` | Run the suite and enforce 80% coverage thresholds |
 | `npm run test:live` | Live API smoke test (builds `lib/`, then hits Open Library + TMDB) |
 
 ## Environment variables
@@ -155,6 +156,21 @@ Done.
 If movie tests fail with a network/timeout error, books may still pass — check DNS/VPN or try again later.
 
 Script location: `scripts/test-search.mjs`
+
+## Automated testing
+
+The offline suite uses Vitest's Jest-compatible API, React Testing Library,
+and MSW. It covers utility functions, search-hook loading/success/error states,
+watchlist rendering and filters, and the complete login → search → add → status
+→ rating journey.
+
+```bash
+npm test
+npm run test:coverage
+```
+
+The coverage command writes an HTML report to `coverage/` and fails when
+statements, branches, functions, or lines fall below 80%.
 
 ## Project structure
 
