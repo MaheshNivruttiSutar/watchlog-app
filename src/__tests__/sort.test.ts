@@ -1,4 +1,3 @@
-import { describe, it, expect } from 'vitest';
 import { sortByRating, sortByDateAdded } from '../utils/sort.js';
 import { mockWatchlist } from './mockData.js';
 

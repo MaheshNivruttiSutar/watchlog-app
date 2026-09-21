@@ -36,7 +36,7 @@ cp .env.example .env   # optional — needed for movie search
 | `npm run preview` | Preview the production app build |
 | `npm run type-check` | Typecheck with TypeScript (`tsc --noEmit`) |
 | `npm test` | Unit tests (mocked APIs, offline) |
-| `npm run test:watch` | Vitest in watch mode |
+| `npm run test:watch` | Jest in watch mode |
 | `npm run test:coverage` | Run the suite and enforce 80% coverage thresholds |
 | `npm run test:live` | Live API smoke test (builds `lib/`, then hits Open Library + TMDB) |
 
@@ -159,7 +159,7 @@ Script location: `scripts/test-search.mjs`
 
 ## Automated testing
 
-Stage 9 write-up: **[STAGE-9.md](STAGE-9.md)**.
+Stage 9 write-up: **[STAGE-9.md](STAGE-9.md)**. On this branch the runner is Jest; Vite still builds the app.
 
 ```bash
 npm test

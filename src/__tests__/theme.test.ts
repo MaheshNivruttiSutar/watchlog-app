@@ -1,4 +1,3 @@
-import { describe, expect, it, vi } from 'vitest';
 import {
   applyTheme,
   getInitialTheme,
@@ -17,7 +16,7 @@ describe('theme utilities', () => {
   });
 
   it('uses the operating-system preference when no theme is stored', () => {
-    vi.mocked(window.matchMedia).mockReturnValue({
+    jest.mocked(window.matchMedia).mockReturnValue({
       matches: true,
     } as MediaQueryList);
 

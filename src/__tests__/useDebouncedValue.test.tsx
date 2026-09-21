@@ -1,8 +1,5 @@
-// @vitest-environment jsdom
-
 import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { useDebouncedValue } from '../hooks/useDebouncedValue';
 
 (
@@ -25,7 +22,7 @@ function renderProbe(value: string, delayMs = 300) {
 }
 
 beforeEach(() => {
-  vi.useFakeTimers();
+  jest.useFakeTimers();
   container = document.createElement('div');
   root = createRoot(container);
   latestValue = '';
@@ -35,7 +32,7 @@ afterEach(() => {
   act(() => {
     root.unmount();
   });
-  vi.useRealTimers();
+  jest.useRealTimers();
 });
 
 describe('useDebouncedValue', () => {
@@ -47,12 +44,12 @@ describe('useDebouncedValue', () => {
     expect(latestValue).toBe('dune');
 
     act(() => {
-      vi.advanceTimersByTime(299);
+      jest.advanceTimersByTime(299);
     });
     expect(latestValue).toBe('dune');
 
     act(() => {
-      vi.advanceTimersByTime(1);
+      jest.advanceTimersByTime(1);
     });
     expect(latestValue).toBe('foundation');
   });
@@ -61,17 +58,17 @@ describe('useDebouncedValue', () => {
     renderProbe('d');
 
     act(() => {
-      vi.advanceTimersByTime(200);
+      jest.advanceTimersByTime(200);
     });
     renderProbe('dune');
 
     act(() => {
-      vi.advanceTimersByTime(100);
+      jest.advanceTimersByTime(100);
     });
     expect(latestValue).toBe('d');
 
     act(() => {
-      vi.advanceTimersByTime(200);
+      jest.advanceTimersByTime(200);
     });
     expect(latestValue).toBe('dune');
   });

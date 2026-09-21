@@ -12,7 +12,7 @@ WatchLog is a personal movie and book watchlist:
 4. Practice protected routes with fake login (demo users in `localStorage`)
 5. Switch UI language (EN / HI) and light / dark theme
 6. Load the same UI from a separate host via Module Federation (Stage 8)
-7. Fail fast on contract breaks via Vitest + RTL + MSW (Stage 9)
+7. Fail fast on contract breaks via Jest + RTL + MSW (Stage 9)
 
 **Builds from this repo:**
 
@@ -34,7 +34,8 @@ watchLogProject/
 ├── index.html              # HTML shell — Vite mounts React into #root
 ├── package.json            # Scripts and dependencies
 ├── vite.config.ts          # React app build / dev server
-├── vitest.config.ts        # jsdom, MSW setup, 80% coverage gates
+├── jest.config.cjs         # jsdom, MSW setup, 80% coverage gates
+├── babel.config.jest.cjs   # Jest-only TS/JSX transform (not Vite/Webpack)
 ├── webpack/                # WatchLog Module Federation remote
 │   ├── remote.config.cjs
 │   ├── sharedSingletons.cjs  # react / react-dom / react-router-dom
@@ -50,7 +51,7 @@ watchLogProject/
 ├── dist/                   # Generated — production Vite build
 ├── dist-remote/            # Generated — Webpack remote
 ├── lib/                    # Generated — compiled data layer for Node
-├── coverage/               # Generated — Vitest coverage (git-ignored)
+├── coverage/               # Generated — Jest coverage (git-ignored)
 ├── docs/
 │   ├── ARCHITECTURE.md     # This file
 │   ├── STAGE-7-PROFILING.md
@@ -75,7 +76,7 @@ watchLogProject/
     ├── components/         # Sidebar, search, watchlist grid, rating, …
     ├── pages/              # One screen per route
     ├── styles/
-    └── __tests__/          # Vitest + RTL + MSW (see Testing below)
+    └── __tests__/          # Jest + RTL + MSW (see Testing below)
 ```
 
 Ignore `node_modules/` (installed packages). Treat `dist/`, `dist-remote/`, `host-shell/dist/`, `lib/`, and `coverage/` as generated output, not source of truth.
@@ -194,7 +195,9 @@ Write-up: [STAGE-8.md](../STAGE-8.md). Bundle proof: [STAGE-8-BUNDLE-ANALYSIS.md
 
 ## Testing (Stage 9)
 
-Vitest runs the suite (`npm test`). React Testing Library queries the UI. MSW intercepts Open Library / TMDB `fetch`. Watchlist mutations are **not** HTTP — they use `watchlistApi` + `localStorage`. Tests that need an empty list must `saveWatchlist([])` or they get the seed `mockWatchlist`.
+Jest runs the suite (`npm test`). React Testing Library queries the UI. MSW intercepts Open Library / TMDB `fetch`. Watchlist mutations are **not** HTTP — they use `watchlistApi` + `localStorage`. Tests that need an empty list must `saveWatchlist([])` or they get the seed `mockWatchlist`.
+
+Vite remains the app bundler. Jest 29 compiles tests through `babel.config.jest.cjs` because the repo is `"type": "module"`.
 
 Each React test gets a fresh `QueryClient` with retries off (`renderWithProviders.tsx`). Production `queryClient` has 30s `staleTime` and must not be shared across tests except the journey, which clears it in `beforeEach`.
 

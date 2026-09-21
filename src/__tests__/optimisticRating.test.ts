@@ -1,5 +1,4 @@
 import { QueryClient } from '@tanstack/react-query';
-import { describe, expect, it } from 'vitest';
 import { mockWatchlist } from './mockData.js';
 import { queryKeys } from '../query/keys.js';
 import type { WatchlistItem } from '../types/watchlistItem.js';

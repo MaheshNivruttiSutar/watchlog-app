@@ -1,4 +1,3 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import {
   getPopularMovies,
   getPopularBooks,
@@ -6,16 +5,30 @@ import {
 } from '../api/popular.js';
 import { SearchApiError } from '../api/search.js';
 
+const originalFetch = globalThis.fetch;
+
+function stubFetch() {
+  globalThis.fetch = jest.fn() as typeof fetch;
+}
+
+function restoreFetch() {
+  globalThis.fetch = originalFetch;
+}
+
+function mockedFetch() {
+  return jest.mocked(fetch);
+}
+
 describe('getPopularMovies', () => {
   const originalApiKey = process.env.TMDB_API_KEY;
 
   beforeEach(() => {
-    vi.stubGlobal('fetch', vi.fn());
+    stubFetch();
     process.env.TMDB_API_KEY = 'test-api-key';
   });
 
   afterEach(() => {
-    vi.unstubAllGlobals();
+    restoreFetch();
     process.env.TMDB_API_KEY = originalApiKey;
   });
 
@@ -39,7 +52,7 @@ describe('getPopularMovies', () => {
       ],
     };
 
-    vi.mocked(fetch).mockResolvedValueOnce({
+    mockedFetch().mockResolvedValueOnce({
       ok: true,
       json: async () => mockResponse,
     } as Response);
@@ -64,11 +77,11 @@ describe('getPopularMovies', () => {
 
 describe('getPopularBooks', () => {
   beforeEach(() => {
-    vi.stubGlobal('fetch', vi.fn());
+    stubFetch();
   });
 
   afterEach(() => {
-    vi.unstubAllGlobals();
+    restoreFetch();
   });
 
   it('returns trending books from Open Library', async () => {
@@ -84,7 +97,7 @@ describe('getPopularBooks', () => {
       ],
     };
 
-    vi.mocked(fetch).mockResolvedValueOnce({
+    mockedFetch().mockResolvedValueOnce({
       ok: true,
       json: async () => mockResponse,
     } as Response);
@@ -102,7 +115,7 @@ describe('getPopularBooks', () => {
   });
 
   it('throws SearchApiError on network failure', async () => {
-    vi.mocked(fetch).mockRejectedValueOnce(new Error('Network down'));
+    mockedFetch().mockRejectedValueOnce(new Error('Network down'));
 
     await expect(getPopularBooks()).rejects.toThrow(
       'Network error while fetching popular books',
@@ -114,17 +127,17 @@ describe('getPopularContent', () => {
   const originalApiKey = process.env.TMDB_API_KEY;
 
   beforeEach(() => {
-    vi.stubGlobal('fetch', vi.fn());
+    stubFetch();
     process.env.TMDB_API_KEY = 'test-api-key';
   });
 
   afterEach(() => {
-    vi.unstubAllGlobals();
+    restoreFetch();
     process.env.TMDB_API_KEY = originalApiKey;
   });
 
   it('returns movies and books together', async () => {
-    vi.mocked(fetch)
+    mockedFetch()
       .mockResolvedValueOnce({
         ok: true,
         json: async () => ({

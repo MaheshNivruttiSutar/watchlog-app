@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { waitFor } from '@testing-library/react';
 import { i18n } from '../i18n/index.js';
 import { LOCALE_STORAGE_KEY } from '../i18n/locale.js';
 import { useUiStore } from '../store/uiStore.js';
@@ -13,42 +13,14 @@ const uiDefaults = {
   locale: 'en' as const,
 };
 
-function createMemoryStorage(): Storage {
-  const store = new Map<string, string>();
-
-  return {
-    get length() {
-      return store.size;
-    },
-    clear() {
-      store.clear();
-    },
-    getItem(key) {
-      return store.has(key) ? store.get(key)! : null;
-    },
-    key(index) {
-      return [...store.keys()][index] ?? null;
-    },
-    removeItem(key) {
-      store.delete(key);
-    },
-    setItem(key, value) {
-      store.set(key, String(value));
-    },
-  };
-}
-
 beforeEach(() => {
-  vi.stubGlobal('localStorage', createMemoryStorage());
-  vi.stubGlobal('document', {
-    documentElement: { dataset: {} as Record<string, string>, lang: 'en' },
-  });
+  localStorage.clear();
 });
 
 afterEach(() => {
   useUiStore.setState(uiDefaults);
   void i18n.changeLanguage('en');
-  vi.unstubAllGlobals();
+  localStorage.clear();
 });
 
 describe('uiStore', () => {
@@ -104,7 +76,7 @@ describe('uiStore', () => {
     expect(useUiStore.getState().locale).toBe('hi');
     expect(localStorage.getItem(LOCALE_STORAGE_KEY)).toBe('hi');
     expect(document.documentElement.lang).toBe('hi');
-    await vi.waitFor(() => {
+    await waitFor(() => {
       expect(i18n.language).toBe('hi');
     });
   });

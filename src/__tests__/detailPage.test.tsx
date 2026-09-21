@@ -1,7 +1,6 @@
 import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Route, Routes } from 'react-router-dom';
-import { describe, expect, it } from 'vitest';
 import DetailPage from '../pages/DetailPage';
 import { saveWatchlist } from '../utils/watchlistStorage';
 import { mockWatchlist } from './mockData';

@@ -1,4 +1,3 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   DEFAULT_LOCALE,
   getInitialLocale,
@@ -7,37 +6,12 @@ import {
   LOCALE_STORAGE_KEY,
 } from '../i18n/locale.js';
 
-function createMemoryStorage(): Storage {
-  const store = new Map<string, string>();
-
-  return {
-    get length() {
-      return store.size;
-    },
-    clear() {
-      store.clear();
-    },
-    getItem(key) {
-      return store.has(key) ? store.get(key)! : null;
-    },
-    key(index) {
-      return [...store.keys()][index] ?? null;
-    },
-    removeItem(key) {
-      store.delete(key);
-    },
-    setItem(key, value) {
-      store.set(key, String(value));
-    },
-  };
-}
-
 beforeEach(() => {
-  vi.stubGlobal('localStorage', createMemoryStorage());
+  localStorage.clear();
 });
 
 afterEach(() => {
-  vi.unstubAllGlobals();
+  localStorage.clear();
 });
 
 describe('locale', () => {

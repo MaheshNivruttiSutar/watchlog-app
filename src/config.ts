@@ -3,7 +3,7 @@
  * TMDB (movies) needs a free API key. Open Library (books) does not.
  *
  * Browser (Vite): set VITE_TMDB_API_KEY in .env
- * Node (tests/scripts): set TMDB_API_KEY in .env — loaded via vitest.config / scripts
+ * Node (tests/scripts): set TMDB_API_KEY in .env — loaded via Jest setup / scripts
  */
 
 const TMDB_BASE_URL = 'https://api.themoviedb.org/3';
@@ -22,7 +22,7 @@ export const config = {
 
 /** Read API key at call time so tests and runtime env changes work. */
 export function getTmdbApiKey(): string {
-  // Node (vitest, live script): use process.env — import.meta.env is Vite-only
+  // Node (Jest, live script): use process.env — import.meta.env is Vite-only
   if (typeof process !== 'undefined' && process.versions?.node) {
     return process.env.TMDB_API_KEY ?? '';
   }

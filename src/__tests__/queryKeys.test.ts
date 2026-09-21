@@ -1,4 +1,3 @@
-import { describe, expect, it } from 'vitest';
 import { SearchApiError } from '../api/search.js';
 import { getSearchErrorKey } from '../hooks/useTitleSearch.js';
 import { queryKeys } from '../query/keys.js';

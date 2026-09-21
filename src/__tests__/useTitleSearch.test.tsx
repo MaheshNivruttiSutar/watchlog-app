@@ -2,7 +2,6 @@ import { QueryClientProvider } from '@tanstack/react-query';
 import { renderHook, waitFor } from '@testing-library/react';
 import { delay, http, HttpResponse } from 'msw';
 import type { ReactNode } from 'react';
-import { describe, expect, it } from 'vitest';
 import { SearchApiError } from '../api/search';
 import {
   getSearchErrorKey,

@@ -1,4 +1,3 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import {
   searchBooks,
   searchMovies,
@@ -7,13 +6,27 @@ import {
   isTransientSearchError,
 } from '../api/search.js';
 
+const originalFetch = globalThis.fetch;
+
+function stubFetch() {
+  globalThis.fetch = jest.fn() as typeof fetch;
+}
+
+function restoreFetch() {
+  globalThis.fetch = originalFetch;
+}
+
+function mockedFetch() {
+  return jest.mocked(fetch);
+}
+
 describe('searchBooks', () => {
   beforeEach(() => {
-    vi.stubGlobal('fetch', vi.fn());
+    stubFetch();
   });
 
   afterEach(() => {
-    vi.unstubAllGlobals();
+    restoreFetch();
   });
 
   it('returns search results from Open Library', async () => {
@@ -30,7 +43,7 @@ describe('searchBooks', () => {
       ],
     };
 
-    vi.mocked(fetch).mockResolvedValueOnce({
+    mockedFetch().mockResolvedValueOnce({
       ok: true,
       json: async () => mockResponse,
     } as Response);
@@ -52,7 +65,7 @@ describe('searchBooks', () => {
   });
 
   it('throws SearchApiError on network failure', async () => {
-    vi.mocked(fetch).mockRejectedValueOnce(new Error('Network down'));
+    mockedFetch().mockRejectedValueOnce(new Error('Network down'));
 
     await expect(searchBooks('dune')).rejects.toThrow(
       'Network error while searching books',
@@ -60,7 +73,7 @@ describe('searchBooks', () => {
   });
 
   it('throws SearchApiError on non-OK response', async () => {
-    vi.mocked(fetch).mockResolvedValueOnce({
+    mockedFetch().mockResolvedValueOnce({
       ok: false,
       status: 500,
     } as Response);
@@ -73,12 +86,12 @@ describe('searchMovies', () => {
   const originalApiKey = process.env.TMDB_API_KEY;
 
   beforeEach(() => {
-    vi.stubGlobal('fetch', vi.fn());
+    stubFetch();
     process.env.TMDB_API_KEY = 'test-api-key';
   });
 
   afterEach(() => {
-    vi.unstubAllGlobals();
+    restoreFetch();
     process.env.TMDB_API_KEY = originalApiKey;
   });
 
@@ -95,7 +108,7 @@ describe('searchMovies', () => {
       ],
     };
 
-    vi.mocked(fetch).mockResolvedValueOnce({
+    mockedFetch().mockResolvedValueOnce({
       ok: true,
       json: async () => mockResponse,
     } as Response);
@@ -157,15 +170,15 @@ describe('isTransientSearchError', () => {
 
 describe('search', () => {
   beforeEach(() => {
-    vi.stubGlobal('fetch', vi.fn());
+    stubFetch();
   });
 
   afterEach(() => {
-    vi.unstubAllGlobals();
+    restoreFetch();
   });
 
   it('calls searchBooks when type is book', async () => {
-    vi.mocked(fetch).mockResolvedValueOnce({
+    mockedFetch().mockResolvedValueOnce({
       ok: true,
       json: async () => ({ docs: [] }),
     } as Response);

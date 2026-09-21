@@ -8,19 +8,25 @@ complete user journey fail fast when their contracts break.
 
 | Tool | Job in this repo |
 |------|------------------|
-| Vitest | Discovers tests, assertions, coverage (`npm test`) |
+| Jest 29 | Discovers tests, assertions, coverage (`npm test`) |
+| babel-jest | Compiles TypeScript/JSX to CommonJS for the runner |
 | jsdom | Browser-like DOM |
 | React Testing Library | Query the accessible UI a user would see |
 | user-event | Clicks and typing |
 | MSW 2 | Intercepts Fetch for Open Library / TMDB |
 
-The course names Jest. This project already ran Vitest with Vite. The suite
-uses Jest-compatible `describe` / `it` / `expect`. RTL and MSW are the same
-tools the Jest submissions use.
+The course names Jest. Vite still builds the app (`npm run dev` / `npm run build`).
+Jest only replaced the test runner. `main` keeps Vitest; this `stage-9-jest`
+branch is the Jest-shaped suite if that is what review asks for.
 
 MSW is only for HTTP. Watchlist create/update/rate still go through
 `localStorage`. Empty-list tests must call `saveWatchlist([])` or the API
 falls back to the seeded mock list.
+
+Jest 29 does not execute native ESM the way Vitest does. Tests are compiled
+with a Jest-only Babel config (`babel.config.jest.cjs`) so `"type": "module"`
+does not block the runner. Webpack still uses ts-loader. Vite still uses
+esbuild.
 
 ## Pyramid
 
@@ -53,15 +59,11 @@ npm run type-check
 `npm run test:coverage` writes `coverage/` (git-ignored) and exits non-zero if
 any of statements, branches, functions, or lines drop below 80%.
 
-Measured result when Stage 9 landed:
-
-- Statements / lines: 96.12%
-- Branches: 84.56%
-- Functions: 92.53%
-
 ## Layout
 
-- `vitest.config.ts` — jsdom, setup files, coverage include/exclude, thresholds
+- `jest.config.cjs` — jsdom, setup files, coverage include/exclude, thresholds
+- `jest.jsdom.cjs` — copies Node Fetch APIs onto jsdom (MSW 2 needs them)
+- `babel.config.jest.cjs` — Jest-only transform (not used by Vite or Webpack)
 - `src/__tests__/setup.ts` — MSW listen/reset, store reset, localStorage
 - `src/__tests__/mswServer.ts` — default handlers; unhandled requests error
 - `src/__tests__/renderWithProviders.tsx` — isolated `QueryClient` per test

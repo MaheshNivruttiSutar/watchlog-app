@@ -1,4 +1,3 @@
-import { describe, it, expect } from 'vitest';
 import { groupByGenre } from '../utils/group.js';
 import { mockWatchlist } from './mockData.js';
 

@@ -1,5 +1,4 @@
 import { act, screen } from '@testing-library/react';
-import { afterEach, describe, expect, it, vi } from 'vitest';
 import SearchProfileHud from '../components/SearchProfileHud';
 import {
   PROFILE_STORAGE_KEY,
@@ -30,13 +29,13 @@ describe('SearchProfileHud', () => {
       },
     ];
 
-    vi.useFakeTimers();
+    jest.useFakeTimers();
     renderWithProviders(<SearchProfileHud />);
 
     expect(screen.getByText('Search Profiler')).toBeInTheDocument();
 
     act(() => {
-      vi.advanceTimersByTime(150);
+      jest.advanceTimersByTime(150);
     });
 
     expect(screen.getByText(/"SearchBar": 3/)).toBeInTheDocument();

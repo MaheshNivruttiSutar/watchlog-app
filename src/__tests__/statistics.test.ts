@@ -1,4 +1,3 @@
-import { describe, it, expect } from 'vitest';
 import { calculateStatistics } from '../utils/statistics.js';
 import { mockWatchlist, emptyWatchlist } from './mockData.js';
 

@@ -1,10 +1,7 @@
-// @vitest-environment jsdom
-
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { act, type ReactNode } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { MemoryRouter } from 'react-router-dom';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import '../i18n';
 import WatchlistGrid from '../components/WatchlistGrid';
 import { useWatchlistCard } from '../components/WatchlistCard';

@@ -1,7 +1,6 @@
 import { createRequire } from 'node:module';
-import { describe, expect, it } from 'vitest';
 
-const require = createRequire(import.meta.url);
+const require = createRequire(__filename);
 const {
   getSharedSingletons,
   listSharedSingletonNames,
